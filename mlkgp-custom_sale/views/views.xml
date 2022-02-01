@@ -1,19 +1,16 @@
 <odoo>
   <data>
     <!-- explicit list view definition -->
-<!--
-    <record model="ir.ui.view" id="mlkgp-custom_sale.list">
-      <field name="name">mlkgp-custom_sale list</field>
-      <field name="model">mlkgp-custom_sale.mlkgp-custom_sale</field>
+    <record model="ir.ui.view" id="sale_view_order_form_inherit">
+      <field name="name">sale.view_order_form.inherit</field>
+      <field name="inherit_id" ref="sale.view_order_form"/>
+      <field name="model">sale.order</field>
       <field name="arch" type="xml">
-        <tree>
-          <field name="name"/>
-          <field name="value"/>
-          <field name="value2"/>
-        </tree>
+        <xpath expr="//group[@name='sale_reporting']" position="attributes">
+          <attribute name="groups">sales_team.group_sale_manager</attribute>
+        </xpath>
       </field>
     </record>
--->
 
     <!-- actions opening views on models -->
 <!--
