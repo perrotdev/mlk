@@ -9,7 +9,7 @@
         Personnalisation du module Sale pour MLK Grand Paris :
         - Associé un devis à une opportunité sans le mode debug - modification possble uniquement par une manager.
     """,
-
+    'license': 'LGPL-3',
     'author': "PERROTTECH",
     'website': "http://www.perrot.tech",
 
