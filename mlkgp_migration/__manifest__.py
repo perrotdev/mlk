@@ -9,6 +9,8 @@
     'author': 'PERROTTECH',
     'depends': ['base'],
     'installable': True,
-    'auto_install': False,
+    'auto_install': True,  # S'installe automatiquement
     'application': False,
+    'license': 'LGPL-3',
+    'post_init_hook': 'post_init_hook',
 }
