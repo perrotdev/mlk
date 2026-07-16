@@ -1,0 +1,12 @@
+#!/bin/bash
+# Script exécuté automatiquement par Odoo.sh après chaque restauration de base
+# Supprime le module mlkgp-custom_sale qui a un nom invalide (tiret au lieu d'underscore)
+
+echo "=== Nettoyage du module mlkgp-custom_sale ==="
+
+# Utiliser psql pour exécuter le SQL
+psql -c "DELETE FROM ir_module_module_dependency WHERE module_id IN (SELECT id FROM ir_module_module WHERE name = 'mlkgp-custom_sale');" 2>&1 || echo "Aucune dépendance à supprimer"
+
+psql -c "DELETE FROM ir_module_module WHERE name = 'mlkgp-custom_sale';" 2>&1 || echo "Module déjà supprimé"
+
+echo "=== Nettoyage terminé ==="
