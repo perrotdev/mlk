@@ -1,9 +1,9 @@
 ---
 title: "Spécification fonctionnelle et technique — Référentiel Contacts, Pistes et Opportunités"
 project: "Refonte ERP Odoo 19 — Espace Grand Paris (EGP)"
-version: "0.4"
-status: "Projet de spécification — réponses client intégrées, arbitrages restants ciblés"
-date: "2026-08-09"
+version: "0.5"
+status: "Projet de spécification — retours client v0.4 intégrés, arbitrages restants ciblés"
+date: "2026-09-06"
 source_system: "Odoo 16"
 target_system: "Odoo 19"
 ---
@@ -18,7 +18,7 @@ target_system: "Odoo 19"
 | Périmètre | Contacts, prospection sortante, CRM Opportunités, interfaces Ventes/Projet/Facturation |
 | Cible | Odoo 19, base multi-sociétés |
 | Origine | Mise à niveau en cours depuis Odoo 16 |
-| Statut | Révision 0.4 — étapes post-gain `is_won`, exclusion des contrats cadres des KPI, distinction calcul/cron, clarification option/Location et nettoyages |
+| Statut | Révision 0.5 — retours client v0.4 : apporteur d'affaire, taxonomie des types d'événement, segment de marché, nombre d'événements annuels, validations de décisions |
 | Préfixe technique proposé | `egp_` |
 | Principe directeur | Standard Odoo 19 d'abord, extension par addons versionnés lorsque le standard ne suffit pas |
 
@@ -33,7 +33,8 @@ target_system: "Odoo 19"
 | 0.1 | 2026-08-05 | Première consolidation des trois DCF | Archivée comme base de travail |
 | 0.2 | 2026-08-09 | SIRET natif, nom natif, première hypothèse Rendez-vous, perte native, approbation Studio et réécriture de la mise à niveau Odoo 16 → 19 | Archivée comme base de travail |
 | 0.3 | 2026-08-09 | Décisions client intégrées : multi-sociétés, filiales, qualification, sécurité équipe, paramètres administrables, import ADN manuel, projet enrichi depuis le CRM et réouverture de l’architecture Location/espaces | Archivée comme base de travail |
-| 0.4 | 2026-08-09 | Étapes post-gain toutes `is_won` avec KPI ancrés sur `date_closed` ; exclusion des opportunités de type contrat cadre des prévisions et taux ; distinction explicite champs calculés événementiels vs champs mis à jour par cron ; clarification option/espaces en deux temps (intention commerciale sur le lead, engagement dans Location) ; reprise automatique des données de qualification dans le devis de location, indicateur de disponibilité en qualification et mise à jour des dates du devis via bandeau + bouton ; suppression de la colonne probabilité indicative ; nettoyage des dépendances d'addons ; complétude Contacts non stockée ; corrections de numérotation | Révision courante |
+| 0.4 | 2026-08-09 | Étapes post-gain toutes `is_won` avec KPI ancrés sur `date_closed` ; exclusion des opportunités de type contrat cadre des prévisions et taux ; distinction explicite champs calculés événementiels vs champs mis à jour par cron ; clarification option/espaces en deux temps (intention commerciale sur le lead, engagement dans Location) ; reprise automatique des données de qualification dans le devis de location, indicateur de disponibilité en qualification et mise à jour des dates du devis via bandeau + bouton ; suppression de la colonne probabilité indicative ; nettoyage des dépendances d'addons ; complétude Contacts non stockée ; corrections de numérotation | Archivée comme base de travail |
+| 0.5 | 2026-09-06 | Retours client v0.4 : apporteur d'affaire et trois schémas d'intermédiation (§7.2.1, §8.5) ; taxonomie hiérarchique des types d'événement fournie (§8.10) ; segment de marché (§8.11) ; nombre d'événements annuels ; précision du nombre de personnes ; validation des décisions EGP-DEC-003/005/009/029 et arbitrage EGP-DEC-010A/021 | Révision courante |
 
 ## Table des matières
 
@@ -56,7 +57,7 @@ target_system: "Odoo 19"
 17. [Plan d'implémentation proposé](#17-plan-dimplémentation-proposé)
 18. [Annexes](#18-annexes)
 
-***
+---
 
 # 1. Résumé exécutif
 
@@ -226,7 +227,7 @@ Cette convention reprend la grille des DCF : rouge indispensable, orange souhait
 | Référentiel | Liste administrable portée par un modèle Odoo, avec code, libellé, ordre et archivage |
 | Contrat cadre | Opportunité mère représentant un accord global, reliée à plusieurs opportunités filles événementielles |
 
-***
+---
 
 # 3. Architecture fonctionnelle cible
 
@@ -337,7 +338,7 @@ Les étapes sont rattachées aux équipes par le champ natif `crm.stage.team_ids
 
 Cette stratégie évite de dupliquer une même organisation entre la SCIC, MLK Restauration et les autres entités, tout en conservant les règles multi-sociétés sur les transactions.
 
-***
+---
 
 # 4. Architecture des addons Odoo
 
@@ -450,7 +451,7 @@ addons/
 - un champ dont la valeur dépend de l'écoulement du temps (inactivité, période glissante, expiration d'option, passage en dormant) n'est jamais un simple champ calculé stocké par `@api.depends` : il est soit calculé à la volée, soit un champ régulier rafraîchi par lot via un `ir.cron`, car un `@api.depends` ne se redéclenche pas au seul passage du temps ;
 - les méthodes d'automatisation sont réentrantes afin d'éviter les doublons d'activités ou de projets.
 
-***
+---
 # 5. Conception du référentiel Contacts
 
 ## 5.1 Exigences fonctionnelles
@@ -662,7 +663,7 @@ Les champs suivants sont créés sur `crm.lead`. Ils restent présents après co
 | ID | Nom fonctionnel | Nom technique | Type | Obligatoire avant conversion |
 |---|---|---|---|---|
 | EGP-FLD-LEAD-110 | Type d'événement | `egp_event_type_id` | Many2one `egp.event.type` | Oui |
-| EGP-FLD-LEAD-111 | Nombre de participants | `egp_participant_count` | Integer | Oui, strictement positif |
+| EGP-FLD-LEAD-111 | Nombre de participants (personnes) | `egp_participant_count` | Integer | Oui, strictement positif |
 | EGP-FLD-LEAD-112 | Date/période pressentie | `egp_event_period_note` | Char/Text | Oui si les dates ne sont pas connues |
 | EGP-FLD-LEAD-113 | Début événement | `egp_event_start` | Datetime | Conditionnel |
 | EGP-FLD-LEAD-114 | Fin événement | `egp_event_end` | Datetime | Conditionnel ; postérieure au début |
@@ -672,6 +673,8 @@ Les champs suivants sont créés sur `crm.lead`. Ils restent présents après co
 | EGP-FLD-LEAD-118 | Description du besoin | `egp_need_description` | Html | Oui avant conversion |
 | EGP-FLD-LEAD-119 | Contraintes | `egp_constraints` | Html/Text | Non |
 | EGP-FLD-LEAD-120 | Objectifs du client | `egp_client_objectives` | Html/Text | Non |
+| EGP-FLD-LEAD-121 | Nombre d'événements annuels | `egp_annual_event_count` | Integer | Non ; volume annuel d'événements estimé du prospect, indicateur de potentiel récurrent |
+| EGP-FLD-LEAD-122 | Segment de marché | `egp_market_segment_id` | Many2one `egp.market.segment` | Non ; classification marché de l'affaire, commune à la piste et à l'opportunité |
 
 ### 6.3.3 Qualification commerciale et signaux
 
@@ -782,7 +785,7 @@ entité commerciale
 
 La comparaison textuelle du besoin ne sera pas bloquante automatiquement. Le système présente les dossiers potentiellement liés. **Décision validée — EGP-DEC-013 :** le blocage strict repose au minimum sur organisation + type d'événement + dates/période, avec dérogation de la Responsable commerciale et justification obligatoire.
 
-***
+---
 # 7. Conception des Opportunités
 
 ## 7.1 Exigences fonctionnelles
@@ -791,7 +794,7 @@ La comparaison textuelle du besoin ne sera pas bloquante automatiquement. Le sys
 
 **EGP-FR-021 — Responsable unique.** Chaque opportunité possède un Commercial référent unique dans `user_id`.
 
-**EGP-FR-022 — Activité obligatoire.** Toute opportunité active doit comporter une prochaine action planifiée, sauf lorsqu'elle est dans une étape gagnée (`stage_id.is_won = True`, c'est-à-dire `OPP_WON` à `OPP_CLOSED`) ou en cas de dérogation explicitement définie.
+**EGP-FR-022 — Activité obligatoire.** Toute opportunité active doit comporter une prochaine action planifiée, sauf étapes postérieures à l'événement ou dérogation explicitement définie.
 
 **EGP-FR-023 — Projet commercial unique.** Une opportunité représente un besoin commercial unique. Un report met à jour l'opportunité existante ; une annulation la marque perdue.
 
@@ -822,24 +825,39 @@ Sources : DCF CRM §1 à §6.
 | EGP-FLD-OPP-013 | Date de clôture prévisionnelle | `date_deadline` | Date native | Ne remplace pas la date d'événement |
 | EGP-FLD-OPP-014 | Client final / bénéficiaire | `egp_end_customer_id` | Many2one `res.partner` société | Facultatif ; renseigné uniquement s'il diffère du client contractuel |
 | EGP-FLD-OPP-015 | Contact du client final | `egp_end_customer_contact_id` | Many2one `res.partner` | Domaine : contact rattaché au client final |
+| EGP-FLD-OPP-016 | Type d'intermédiation | `egp_intermediation_type` | Selection `direct`/`agency`/`introducer` | Détermine le schéma commercial décrit au §7.2.1 |
+| EGP-FLD-OPP-017 | Apporteur d'affaire | `egp_business_introducer_id` | Many2one `res.partner` | Renseigné si un tiers a apporté l'affaire ; distinct du client contractuel et du client final |
 
 ### 7.2.1 Matérialisation Agence vs client final — EGP-DEC-003
 
-La proposition distingue deux rôles sans dupliquer les partenaires :
+La proposition distingue les rôles sans dupliquer les partenaires. Le champ `egp_intermediation_type` (EGP-FLD-OPP-016) formalise **trois schémas** :
 
-- `partner_id` représente le **contact principal contractuel** ; sa société commerciale `partner_id.commercial_partner_id`, affichée par le champ d'interface natif `commercial_partner_id`, représente l'entité qui demande le devis, passe la commande et reçoit la facture ; dans un dossier intermédié, il s'agit généralement de l'agence ;
-- `egp_end_customer_id` représente le **client final ou bénéficiaire** de l'événement lorsqu'il est différent ;
-- si la vente est directe, `egp_end_customer_id` reste vide et la société commerciale du contact contractuel est également le client final ;
-- le devis est créé par défaut avec `partner_id` et la facturation suit les règles d'adresses du partenaire contractuel ; le Projet et le reporting peuvent afficher les deux entités ;
-- le client final ne devient jamais automatiquement le destinataire de facturation.
+**1. Vente directe (`direct`).** Le client contractant est aussi le bénéficiaire : `partner_id` = client final, `egp_end_customer_id` reste vide, `egp_business_introducer_id` vide.
 
-Exemple : Agence Alpha commande un événement pour Marque Beta. `partner_id = Contact Agence Alpha`, `partner_id.commercial_partner_id = Agence Alpha`, `egp_end_customer_id = Marque Beta`.
+**2. Agence contractante / intermédiation (`agency`).** L'agence signe le contrat et reçoit la facture pour le compte d'un bénéficiaire :
 
-> **Statut : proposition à confirmer.** `EGP-DEC-003` reste ouvert jusqu'à validation par le Commercial et la Production, notamment pour les cas où le client final doit aussi recevoir des documents ou accéder au portail.
+- `partner_id` = contact de l'agence ; sa société commerciale `partner_id.commercial_partner_id`, affichée par le champ d'interface natif `commercial_partner_id`, est l'entité qui demande le devis, passe la commande et reçoit la facture ;
+- `egp_end_customer_id` = **client final ou bénéficiaire** de l'événement ;
+- le devis est créé par défaut avec `partner_id` (l'agence) et la facturation suit ses règles d'adresses ; le client final ne devient jamais automatiquement destinataire de facturation.
+
+**3. Apporteur d'affaire (`introducer`).** Un tiers (agence, partenaire, contact) apporte l'affaire mais **ne contracte pas** : le contrat est direct entre EGP et le client final :
+
+- `partner_id` = client final (contractant et facturé) ;
+- `egp_business_introducer_id` (EGP-FLD-OPP-017) = **apporteur d'affaire**, conservé pour la traçabilité de l'origine, le reporting et une éventuelle commission ;
+- l'apporteur n'apparaît ni sur le devis ni sur la facture du client ; sa rémunération éventuelle est traitée séparément (règle de commission à définir avec Ventes/Comptabilité, hors socle CRM V1) ;
+- dans les Contacts, l'apporteur porte la relation **Apporteur d'affaire** (§8.5).
+
+Exemple intermédiation : Agence Alpha commande pour Marque Beta. `egp_intermediation_type = agency`, `partner_id = Contact Agence Alpha`, `commercial_partner_id = Agence Alpha`, `egp_end_customer_id = Marque Beta`.
+
+Exemple apporteur : Agence Alpha signale l'affaire, EGP contracte directement avec Marque Beta. `egp_intermediation_type = introducer`, `partner_id = Contact Marque Beta`, `egp_business_introducer_id = Agence Alpha`, `egp_end_customer_id` vide.
+
+> **Statut : proposition validée par EGP.** `EGP-DEC-003` est confirmée : client contractuel natif + `egp_end_customer_id`. Le cas où l'agence se positionne en **apporteur d'affaire** (et non en contractant) est traité par le schéma `introducer` ci-dessus (`egp_intermediation_type` + `egp_business_introducer_id`), la règle de commission éventuelle restant à cadrer avec Ventes/Comptabilité.
 
 ## 7.3 Bloc Événement
 
-Les champs `egp_event_type_id`, `egp_event_start`, `egp_event_end`, `egp_event_period_note`, `egp_participant_count`, `egp_space_ids`, `egp_need_description`, `egp_constraints` et `egp_client_objectives` sont communs aux pistes et opportunités.
+Les champs `egp_event_type_id`, `egp_event_start`, `egp_event_end`, `egp_event_period_note`, `egp_participant_count`, `egp_market_segment_id`, `egp_space_ids`, `egp_need_description`, `egp_constraints` et `egp_client_objectives` sont communs aux pistes et opportunités.
+
+Le **nombre de personnes** attendues sur l'événement est porté par le champ commun `egp_participant_count` (EGP-FLD-LEAD-111) ; il est affiché dans le bloc Événement de l'opportunité et sert de référence pour vérifier l'adéquation avec la capacité des espaces envisagés. Aucun champ distinct n'est créé.
 
 Champs complémentaires utilisés principalement après conversion :
 
@@ -1121,7 +1139,7 @@ La référence du bon de commande client doit être portée prioritairement par 
 
 > **Décisions validées — EGP-DEC-026 et EGP-DEC-027.** Les transitions sensibles sont exécutées par boutons/méthodes métier ou contrôlées dans `write()` sur `stage_id`. Le glisser-déposer Kanban est bloqué avec un message explicite lorsque les critères ne sont pas satisfaits. Les champs, cibles et règles de clôture du contrat cadre décrits au §7.8 sont retenus.
 
-***
+---
 
 # 8. Référentiels configurables
 
@@ -1176,7 +1194,7 @@ Règles communes :
 | EGP-REF-106 | `egp.contact.department` | Service/département d'un contact | Liste CON-REF-005 |
 | EGP-REF-107 | `egp.contact.channel` | Canal préféré | Téléphone, E-mail, Mobile/SMS, Visioconférence, Autre |
 | EGP-REF-108 | `egp.administrative.region` | Région française | Table de correspondance à charger si retenue |
-| EGP-REF-109 | `egp.event.type` | Type d'événement | Référentiel configurable ; liste initiale à fournir avant recette |
+| EGP-REF-109 | `egp.event.type` | Type d'événement | Hiérarchique (catégorie via `parent_id`) ; liste fournie au §8.10 (EGP-DEC-009) |
 | EGP-REF-111 | `egp.event.configuration` | Configuration de salle | Théâtre, classe, U, cocktail, banquet, etc. à valider |
 | EGP-REF-112 | `egp.catering.type` | Types de restauration | Valeurs à valider avec MLK Restauration |
 | EGP-REF-113 | `egp.technical.level` | Niveau audiovisuel/technique | Valeurs à valider |
@@ -1185,6 +1203,7 @@ Règles communes :
 | EGP-REF-116 | `egp.maturity.level` | Maturité commerciale | Valeurs à valider |
 | EGP-REF-117 | `egp.opportunity.type` | Type d'opportunité | Événement ponctuel, Contrat cadre, Événement sous contrat cadre |
 | EGP-REF-118 | `egp.admin.status` | Statut administratif d'une opportunité | À proposer avec l'ADV ; référentiel configurable |
+| EGP-REF-119 | `egp.market.segment` | Segment de marché | Corporate, Cultuel, Institutionnel, Education, Culture & Entertainment, Grand public, Privé |
 
 ## 8.4 Valeurs initiales — Types de structure
 
@@ -1215,6 +1234,7 @@ Source : DCF Contacts, CON-REF-001, p. 9-10.
 | `CUSTOMER` | Client |
 | `PROSPECT` | Prospect |
 | `PARTNER` | Partenaire |
+| `BUSINESS_INTRODUCER` | Apporteur d'affaire |
 | `SUPPLIER` | Fournisseur |
 | `SERVICE_PROVIDER` | Prestataire |
 | `INSTITUTION` | Institution |
@@ -1284,7 +1304,38 @@ Le DCF mélange dans « statut du client » des notions de cycle de vie — pros
 
 > **Décision validée — EGP-DEC-006.** Le référentiel `egp.client.status` contient uniquement : Prospect, Client actif, Client dormant, Ancien client, Inactif. Les notions Grand compte et Client régulier sont portées par des champs indépendants et peuvent coexister. Une organisation peut donc être simultanément **Client actif**, **Grand compte** et **Client régulier**.
 
-***
+## 8.10 Valeurs initiales — Types d'événement
+
+> **Décision validée — EGP-DEC-009.** La liste est fournie par EGP. Le référentiel `egp.event.type` est **hiérarchique** : chaque type appartient à une **catégorie** (enregistrement parent via `parent_id`). La catégorie sert au regroupement, au filtrage et au reporting ; le type précis reste sélectionné sur la piste et l'opportunité (`egp_event_type_id`). Les codes anglais sont stables ; les libellés sont traduits et administrables. De nouvelles valeurs peuvent être ajoutées par l'Administrateur des référentiels.
+
+| Catégorie (`code`) | Sous-types — libellé (`code`) |
+|---|---|
+| Congrès, conférences et rencontres (`EVT_CONFERENCE`) | Conférence (`CONFERENCE`), Convention (`CONVENTION`), Congrès (`CONGRESS`), Séminaire (`SEMINAR`), Journée d'étude (`STUDY_DAY`), Réunion (`MEETING`), Assemblée générale (`GENERAL_ASSEMBLY`), Formation (`TRAINING`), Workshop (`WORKSHOP`) |
+| Salons & expositions (`EVT_TRADESHOW`) | Salon (`TRADE_SHOW`), Forum (`FORUM`), Exposition (`EXHIBITION`), Job dating (`JOB_DATING`), Showroom (`SHOWROOM`) |
+| Réceptions & événements festifs (`EVT_RECEPTION`) | Cocktail (`COCKTAIL`), Soirée (`PARTY`), Afterwork (`AFTERWORK`), Gala (`GALA`), Cérémonie (`CEREMONY`), Vœux (`NEW_YEAR_GREETINGS`), Remise de prix (`AWARDS`) |
+| Spectacles & événements (`EVT_SHOW`) | Concert (`CONCERT`), Spectacle (`SHOW`), Théâtre (`THEATER`), Stand-up (`STANDUP`), Festival (`FESTIVAL`), Showcase (`SHOWCASE`), Défilé (`FASHION_SHOW`) |
+| Audiovisuel & production (`EVT_AUDIOVISUAL`) | Tournage (`FILMING`), Captation (`RECORDING`), Shooting (`PHOTO_SHOOT`), Émission/Streaming (`BROADCAST`), Répétition (`REHEARSAL`), Résidence artistique (`ARTISTIC_RESIDENCY`), Résidence technique (`TECHNICAL_RESIDENCY`) |
+| Éducation & enseignement (`EVT_EDUCATION`) | Remise de diplômes (`GRADUATION`), Concours (`COMPETITIVE_EXAM`), Examen (`EXAM`), Cérémonie étudiante (`STUDENT_CEREMONY`), Forum étudiant (`STUDENT_FORUM`), Soirée étudiante (`STUDENT_PARTY`) |
+| Institutionnel & citoyen (`EVT_INSTITUTIONAL`) | Élection (`ELECTION`), Réunion publique (`PUBLIC_MEETING`), Cérémonie officielle (`OFFICIAL_CEREMONY`), Rencontre institutionnelle (`INSTITUTIONAL_MEETING`) |
+| Sport & bien-être (`EVT_SPORT`) | Événement sportif (`SPORTS_EVENT`), Compétition (`COMPETITION`), Cours collectifs (`GROUP_CLASSES`), Stage (`SPORTS_CAMP`) |
+| Événement privé (`EVT_PRIVATE`) | Mariage (`WEDDING`), Anniversaire (`BIRTHDAY`), Baptême (`BAPTISM`), Fiançailles (`ENGAGEMENT`), Réception familiale (`FAMILY_GATHERING`), Enterrement (`FUNERAL`), Soirée privée (`PRIVATE_PARTY`) |
+| Culte & rassemblement (`EVT_WORSHIP`) | Culte (`WORSHIP_SERVICE`), Temps de prière (`PRAYER`), Rassemblement (`GATHERING`), Célébration cultuelle (`RELIGIOUS_CELEBRATION`) |
+
+## 8.11 Valeurs initiales — Segment de marché
+
+> **Décision validée — EGP-DEC-009 (complément).** Un champ **Segment de marché** `egp_market_segment_id` (référentiel `egp.market.segment`, EGP-REF-119) est ajouté sur la piste et l'opportunité (EGP-FLD-LEAD-122). Il classe l'affaire selon le marché adressé, indépendamment du type d'événement.
+
+| Code proposé | Libellé |
+|---|---|
+| `CORPORATE` | Corporate |
+| `WORSHIP` | Cultuel |
+| `INSTITUTIONAL` | Institutionnel |
+| `EDUCATION` | Education |
+| `CULTURE_ENTERTAINMENT` | Culture & Entertainment |
+| `GENERAL_PUBLIC` | Grand public |
+| `PRIVATE` | Privé |
+
+---
 
 # 9. Vues, menus et ergonomie
 
@@ -1592,7 +1643,7 @@ Pour `egp.business.activity`, la liste affiche le secteur, l'activité, le code,
 - ordre de tabulation et groupes de champs cohérents ;
 - favoris personnels natifs Odoo autorisés ; filtres d'équipe chargés par XML.
 
-***
+---
 # 10. Processus et automatisations
 
 ## 10.1 Principes d'automatisation
@@ -1790,7 +1841,7 @@ Les événements suivants sont suivis dans le chatter via `tracking=True` ou mes
 - archivage/réactivation ;
 - dérogation de doublon ou de contrôle métier.
 
-***
+---
 # 11. Sécurité, rôles et droits d'accès
 
 ## 11.1 Principes
@@ -2073,7 +2124,7 @@ Proposition :
 
 **Décision validée — EGP-DEC-031.** Cette politique d'export par rôle constitue la règle de V1.
 
-***
+---
 # 12. Reporting et indicateurs
 
 ## 12.1 Principes
@@ -2233,7 +2284,7 @@ Tout modèle SQL devra intégrer explicitement `company_id`, les règles d'accè
 - date de gain : passage étape Gagnée ou commande confirmée ;
 - périmètre société et devise.
 
-***
+---
 # 13. Mise à niveau Odoo 16 vers Odoo 19 et initialisation EGP
 
 ## 13.1 Principe directeur
@@ -2374,7 +2425,7 @@ Le rapport de contrôle compare avant/après au minimum :
 - écarts fonctionnels et financiers expliqués ;
 - validation métier des échantillons Contacts, Pistes, Opportunités, options, contrats cadres et dossiers perdus.
 
-***
+---
 
 # 14. Règles techniques et non fonctionnelles
 
@@ -2418,6 +2469,9 @@ class EgpEventType(models.Model):
 
     name = fields.Char(required=True, translate=True)
     code = fields.Char(required=True, index=True, copy=False)
+    parent_id = fields.Many2one(
+        "egp.event.type", string="Catégorie", index=True, ondelete="restrict"
+    )
     sequence = fields.Integer(default=10)
     active = fields.Boolean(default=True)
     description = fields.Text(translate=True)
@@ -2571,7 +2625,7 @@ Le volume exact sera relevé lors de l'inventaire. Les choix suivants sont reten
 - commentaires orientés raison métier, non répétition du code ;
 - revue de code obligatoire pour sécurité, initialisation des données et finance.
 
-***
+---
 # 15. Stratégie de tests et critères de recette
 
 ## 15.1 Niveaux de tests
@@ -2748,10 +2802,10 @@ La version est acceptée lorsque :
 - l'upgrade standard et l'initialisation EGP respectent les critères Go/No-Go ;
 - la documentation d'exploitation et d'administration est livrée.
 
-***
+---
 # 16. Registre des décisions
 
-## 16.1 Décisions validées et intégrées (V0.3 et V0.4)
+## 16.1 Décisions validées et intégrées (V0.3 à V0.5)
 
 | ID | Décision | Traduction dans la spécification | Statut |
 |---|---|---|---|
@@ -2761,7 +2815,7 @@ La version est acceptée lorsque :
 | EGP-DEC-006 | Séparer cycle client, Grand compte et Client régulier | Coexistence autorisée | Validé |
 | EGP-DEC-007 | Client régulier calculé selon seuils configurables | Nombre d'événements + fenêtre glissante par société | Validé, valeurs à fournir |
 | EGP-DEC-008 | Onglet Événement du Contact en lecture seule | Indicateurs calculés, aucune ressaisie | Validé |
-| EGP-DEC-009 | Types d'événement administrables | Modèle `egp.event.type`, liste initiale à fournir | Architecture validée |
+| EGP-DEC-009 | Types d'événement administrables et hiérarchiques | Modèle `egp.event.type` avec catégorie parente ; taxonomie fournie au §8.10 | Validé (V0.5) |
 | EGP-DEC-010B | Espaces, capacités, configurations et prestations administrables | Gouvernance par rôles ; valeurs initiales à fournir | Architecture validée |
 | EGP-DEC-011 | Critères de qualification du §6.4 | Contrôle serveur bloquant | Validé |
 | EGP-DEC-012 | Inactivité d'une piste à 15 jours, configurable | `EGP-PAR-002`, administration Odoo | Validé |
@@ -2791,34 +2845,33 @@ La version est acceptée lorsque :
 | EGP-DEC-044 | Champs dépendant du temps mis à jour par cron | Inactivité, période glissante et expiration d'option ne sont pas des `@api.depends` stockés | Validé (V0.4) |
 | EGP-DEC-045 | Option/espaces en deux temps | Intention commerciale sur le `crm.lead`, engagement/disponibilité dans Location, reflet en lecture sur l'opportunité (§7.6) | Validé (V0.4) ; mapping technique via EGP-DEC-020 |
 | EGP-DEC-046 | Fluidité qualification → devis de location | Reprise automatique des données de qualification à la création du devis de location (EGP-RG-034B), indicateur de disponibilité Odoo-friendly en qualification (EGP-RG-034C) et mise à jour des dates après création via bandeau + bouton à l'ouverture du devis, saisie loggée dans le CRM (EGP-RG-034D) | Validé (V0.4) ; mapping technique via EGP-DEC-020 |
+| EGP-DEC-003 | Agence vs client final | Client contractuel natif + `egp_end_customer_id` (§7.2.1) | Validé (V0.5) |
+| EGP-DEC-005 | Relation avec EGP unique ou multiple | Relation principale + complémentaires (§5.6) | Validé (V0.5) |
+| EGP-DEC-029 | Liste définitive des champs ADV | Liste proposée au §11.9.1, versionnée dans le code | Validé (V0.5) |
+| EGP-DEC-047 | Apporteur d'affaire | Trois schémas d'intermédiation `direct`/`agency`/`introducer` via `egp_intermediation_type` + `egp_business_introducer_id` (§7.2.1) ; relation Contacts dédiée (§8.5) ; commission éventuelle à cadrer avec Ventes/Comptabilité | Validé (V0.5) |
+| EGP-DEC-048 | Potentiel et segmentation de l'affaire | Champs Nombre d'événements annuels (`egp_annual_event_count`) et Segment de marché (`egp_market_segment_id`, §8.11) ajoutés sur piste et opportunité | Validé (V0.5) |
 
 ## 16.2 Décisions ou données restant à valider
 
 | ID | Sujet restant | Proposition / état actuel | Échéance ou impact |
 |---|---|---|---|
-| EGP-DEC-003 | Agence vs client final | Client contractuel natif + `egp_end_customer_id`, expliqué au §7.2.1 | À confirmer avant gel du formulaire CRM/Projet |
-| EGP-DEC-005 | Relation avec EGP unique ou multiple | Relation principale + complémentaires, expliqué au §5.6 | À confirmer avant développement final Contacts |
-| EGP-DEC-009 | Liste initiale des types d'événement | Référentiel configurable | À fournir avant recette fonctionnelle |
-| EGP-DEC-010A | Modèle technique des espaces | Produit de location direct ou `egp.space` lié à un produit | Prototype Location obligatoire |
-| EGP-DEC-010B | Valeurs espaces/capacités/configurations/prestations | Administrables | À fournir avant recette Location/CRM |
-| EGP-DEC-020 | Conflits et options d'espace | Comportement Location à tester : brouillon, option, commande, chevauchement | Bloque l'addon `egp_crm_rental` |
-| EGP-DEC-021 | Seuil et méthode de calcul de remise | Sera ajouté dans Studio ; règle inactive tant que non fourni | Non bloquant pour les autres développements |
-| EGP-DEC-025 | Règle d'acompte | À définir avec client, Ventes et Comptabilité | Bloque les transitions financières finales |
-| EGP-DEC-029 | Liste définitive des champs ADV | Liste initiale proposée au §11.9.1 ; versionnée dans le code en V1 | À valider avant recette sécurité |
-| EGP-DEC-033 | Définitions détaillées des KPI et cohortes | Atelier avant recette des tableaux de bord | Bloque la validation des KPI, pas le socle CRM |
-| EGP-DEC-034 | Cockpit personnalisé | P2 après stabilisation | Non bloquant |
+| EGP-DEC-010A | Modèle technique des espaces | Choix délégué par EGP ; par défaut **espace = produit de location**, `egp.space` lié à un produit seulement si le catalogue Location ne couvre pas les données métier ; confirmation au prototype | Prototype Location obligatoire |
+| EGP-DEC-010B | Valeurs espaces/capacités/configurations/prestations | Administrables ; détaillées dans le CDF Location/Ventes | À fournir avant recette Location/CRM |
+| EGP-DEC-020 | Conflits et options d'espace | Comportement Location à tester (brouillon, option, commande, chevauchement) ; détaillé dans le CDF Location/Ventes | Bloque l'addon `egp_crm_rental` |
+| EGP-DEC-021 | Validation des remises | Pas de seuil automatique : la remise dépend de trop de variables (lignes produits) et reste **soumise à validation du responsable** ; règle d'approbation configurée dans Studio | Non bloquant ; principe arbitré par EGP |
+| EGP-DEC-025 | Règle d'acompte | À définir avec client, Ventes et Comptabilité ; détaillée dans le CDF Location/Ventes | Bloque les transitions financières finales |
+| EGP-DEC-033 | Définitions détaillées des KPI et cohortes | À voir ultérieurement ; atelier avant recette des tableaux de bord | Bloque la validation des KPI, pas le socle CRM |
+| EGP-DEC-034 | Cockpit personnalisé | À voir ultérieurement ; P2 après stabilisation | Non bloquant |
 | EGP-DEC-036 | Personnalisations Studio Odoo 16 existantes | Audit de la base | Lot 0 |
-| EGP-DEC-037 | Politique RGPD de conservation | Livrable transverse | Avant mise en production |
+| EGP-DEC-037 | Politique RGPD de conservation | Transmise ultérieurement par EGP ; livrable transverse | Avant mise en production |
 
 ## 16.3 Priorités d'arbitrage restantes
 
 1. `EGP-DEC-010A` et `EGP-DEC-020` — prototype du module Location et modèle des espaces ;
-2. `EGP-DEC-003` et `EGP-DEC-005` — validation des deux propositions expliquées dans le document ;
-3. listes initiales `EGP-DEC-009` et `EGP-DEC-010B` — nécessaires avant recette, mais pas pour coder le patron des référentiels ;
-4. `EGP-DEC-025` — règle d'acompte ;
-5. `EGP-DEC-029` — liste ADV ;
-6. `EGP-DEC-033` — définitions KPI ;
-7. `EGP-DEC-036/037` — audit Studio et politique RGPD.
+2. listes et valeurs `EGP-DEC-010B` — nécessaires avant recette, mais pas pour coder le patron des référentiels ;
+3. `EGP-DEC-025` — règle d'acompte ;
+4. `EGP-DEC-033` — définitions KPI ;
+5. `EGP-DEC-036/037` — audit Studio et politique RGPD.
 
 `EGP-DEC-021` n'est plus considérée comme bloquante pour le développement : le seuil de remise pourra être renseigné et activé dans Studio ultérieurement.
 
