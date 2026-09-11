@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- EGP-VIEW-OPP-003 : liste des opportunités -->
+    <record id="crm_case_tree_view_oppor_egp" model="ir.ui.view">
+        <field name="name">crm.lead.list.opportunity.egp</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_case_tree_view_oppor"/>
+        <field name="arch" type="xml">
+            <field name="team_id" position="after">
+                <field name="egp_opportunity_type_id" optional="show"/>
+                <field name="egp_event_type_id" optional="show"/>
+                <field name="egp_market_segment_id" optional="hide"/>
+                <field name="egp_event_start" optional="show"/>
+                <field name="egp_participant_count" optional="hide"/>
+                <field name="egp_admin_status_id" optional="hide"/>
+                <field name="egp_is_grand_account" optional="hide"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- EGP-VIEW-OPP-006 : recherche et filtres par profil -->
+    <record id="view_crm_case_opportunities_filter_egp" model="ir.ui.view">
+        <field name="name">crm.lead.search.opportunity.egp</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.view_crm_case_opportunities_filter"/>
+        <field name="arch" type="xml">
+            <field name="team_id" position="after">
+                <field name="egp_opportunity_type_id"/>
+                <field name="egp_event_type_id"/>
+                <field name="egp_market_segment_id"/>
+                <field name="egp_end_customer_id"/>
+                <field name="egp_business_introducer_id"/>
+            </field>
+            <filter name="open_opportunities" position="after">
+                <separator/>
+                <filter name="egp_exclude_framework" string="Hors contrats cadres"
+                        domain="[('egp_opportunity_type_id.code', '!=', 'FRAMEWORK')]"/>
+                <filter name="egp_framework" string="Contrats cadres"
+                        domain="[('egp_opportunity_type_id.code', '=', 'FRAMEWORK')]"/>
+                <separator/>
+                <filter name="egp_grand_account" string="Grands comptes"
+                        domain="[('egp_is_grand_account', '=', True)]"/>
+                <filter name="egp_tender" string="Appels d'offres"
+                        domain="[('egp_is_tender', '=', True)]"/>
+                <filter name="egp_no_activity" string="Sans activité planifiée"
+                        domain="[('activity_ids', '=', False), ('stage_id.is_won', '=', False)]"/>
+                <separator/>
+                <filter name="egp_event_this_month" string="Événements du mois"
+                        domain="[('egp_event_start', '&gt;=', (context_today() + relativedelta(day=1)).strftime('%Y-%m-%d')),
+                                 ('egp_event_start', '&lt;', (context_today() + relativedelta(months=1, day=1)).strftime('%Y-%m-%d'))]"/>
+            </filter>
+            <xpath expr="//group[@colspan='16']" position="inside">
+                <filter name="egp_group_by_opportunity_type" string="Type d'opportunité"
+                        context="{'group_by': 'egp_opportunity_type_id'}"/>
+                <filter name="egp_group_by_event_type" string="Type d'événement"
+                        context="{'group_by': 'egp_event_type_id'}"/>
+                <filter name="egp_group_by_market_segment" string="Segment de marché"
+                        context="{'group_by': 'egp_market_segment_id'}"/>
+                <filter name="egp_group_by_event_month" string="Mois de l'événement"
+                        context="{'group_by': 'egp_event_start:month'}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- EGP-VIEW-OPP-004 : calendrier commercial des événements -->
+    <record id="view_egp_lead_event_calendar" model="ir.ui.view">
+        <field name="name">crm.lead.calendar.egp.event</field>
+        <field name="model">crm.lead</field>
+        <field name="arch" type="xml">
+            <calendar string="Calendrier des événements" date_start="egp_event_start"
+                      date_stop="egp_event_end" color="user_id" mode="month" event_limit="5"
+                      create_name_field="egp_event_calendar_title">
+                <field name="egp_event_calendar_title" invisible="1"/>
+                <field name="partner_id"/>
+                <field name="egp_event_type_id"/>
+                <field name="egp_participant_count"/>
+                <field name="user_id" filters="1" invisible="1"/>
+                <field name="stage_id"/>
+            </calendar>
+        </field>
+    </record>
+
+    <record id="action_egp_opportunities" model="ir.actions.act_window">
+        <field name="name">Opportunités EGP</field>
+        <field name="res_model">crm.lead</field>
+        <field name="view_mode">kanban,list,form,calendar,activity,pivot,graph</field>
+        <field name="domain">[('type', '=', 'opportunity')]</field>
+        <field name="search_view_id" ref="crm.view_crm_case_opportunities_filter"/>
+        <!-- 'ref()' n'est évaluable que dans l'attribut eval (chargé côté serveur),
+             jamais dans un texte de contexte évalué côté client. -->
+        <field name="context" eval="{
+            'default_type': 'opportunity',
+            'default_team_id': ref('egp_crm.crm_team_egp_commercial'),
+            'default_egp_creation_mode': 'inbound_direct',
+        }"/>
+    </record>
+
+    <record id="action_egp_my_pipeline" model="ir.actions.act_window">
+        <field name="name">Mon portefeuille</field>
+        <field name="res_model">crm.lead</field>
+        <field name="view_mode">kanban,list,form,calendar,activity,pivot,graph</field>
+        <field name="domain">[('type', '=', 'opportunity')]</field>
+        <field name="search_view_id" ref="crm.view_crm_case_opportunities_filter"/>
+        <field name="context" eval="{
+            'default_type': 'opportunity',
+            'default_team_id': ref('egp_crm.crm_team_egp_commercial'),
+            'search_default_assigned_to_me': 1,
+            'search_default_open_opportunities': 1,
+        }"/>
+    </record>
+
+    <record id="action_egp_event_calendar" model="ir.actions.act_window">
+        <field name="name">Calendrier des événements</field>
+        <field name="res_model">crm.lead</field>
+        <field name="view_mode">calendar,list,form</field>
+        <field name="domain">[('type', '=', 'opportunity'), ('egp_event_start', '!=', False)]</field>
+    </record>
+
+    <record id="action_egp_event_calendar_view" model="ir.actions.act_window.view">
+        <field name="sequence">1</field>
+        <field name="view_mode">calendar</field>
+        <field name="view_id" ref="view_egp_lead_event_calendar"/>
+        <field name="act_window_id" ref="action_egp_event_calendar"/>
+    </record>
+
+    <!-- EGP-KPI-OPP : les contrats cadres sont exclus des prévisions (EGP-RG-038A) -->
+    <record id="action_egp_pipeline_analysis" model="ir.actions.act_window">
+        <field name="name">Analyse du pipeline</field>
+        <field name="res_model">crm.lead</field>
+        <field name="view_mode">pivot,graph,list</field>
+        <field name="domain">[('type', '=', 'opportunity'), ('egp_opportunity_type_id.code', '!=', 'FRAMEWORK')]</field>
+    </record>
+
+    <record id="action_egp_framework_contracts" model="ir.actions.act_window">
+        <field name="name">Contrats cadres</field>
+        <field name="res_model">crm.lead</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="domain">[('type', '=', 'opportunity'), ('egp_opportunity_type_id.code', '=', 'FRAMEWORK')]</field>
+        <field name="context" eval="{
+            'default_type': 'opportunity',
+            'default_egp_opportunity_type_id': ref('egp_master_data.opportunity_type_framework'),
+        }"/>
+    </record>
+
+</odoo>

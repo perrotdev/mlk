@@ -1,0 +1,4 @@
+id,code,name,sequence
+opportunity_type_one_off_event,ONE_OFF_EVENT,Événement ponctuel,10
+opportunity_type_framework,FRAMEWORK,Contrat cadre,20
+opportunity_type_framework_event,FRAMEWORK_EVENT,Événement sous contrat cadre,30

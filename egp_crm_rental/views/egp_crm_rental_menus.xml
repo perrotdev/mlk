@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Menu « Espaces » du CRM — §9.1 -->
+    <menuitem id="menu_egp_spaces"
+        name="Espaces"
+        parent="crm.crm_menu_root"
+        groups="egp_crm.group_egp_salesperson,egp_crm.group_egp_sales_manager,egp_crm.group_egp_space_manager"
+        sequence="6"/>
+
+    <menuitem id="menu_egp_space_availability"
+        name="Disponibilité / occupation"
+        parent="menu_egp_spaces"
+        action="action_egp_space_availability"
+        sequence="10"/>
+
+    <!-- Le catalogue et les rôles/matériels restent administrés dans Location et
+         Planning : aucun référentiel EGP parallèle n'est créé (EGP-DEC-010A). -->
+    <menuitem id="menu_egp_space_catalog"
+        name="Catalogue des espaces"
+        parent="egp_master_data.menu_egp_crm_config"
+        action="sale_renting.rental_product_template_action"
+        groups="egp_crm.group_egp_space_manager"
+        sequence="5"/>
+
+    <menuitem id="menu_egp_space_roles"
+        name="Rôles et matériels des espaces"
+        parent="egp_master_data.menu_egp_crm_config"
+        action="planning.planning_action_roles"
+        groups="egp_crm.group_egp_space_manager"
+        sequence="6"/>
+
+</odoo>

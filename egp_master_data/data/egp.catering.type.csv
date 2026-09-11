@@ -1,0 +1,10 @@
+id,code,name,sequence
+catering_type_coffee_break,COFFEE_BREAK,Pause café,10
+catering_type_breakfast,BREAKFAST,Petit-déjeuner,20
+catering_type_cocktail,COCKTAIL,Cocktail,30
+catering_type_buffet,BUFFET,Buffet,40
+catering_type_seated_lunch,SEATED_LUNCH,Déjeuner assis,50
+catering_type_seated_dinner,SEATED_DINNER,Dîner assis,60
+catering_type_lunch_box,LUNCH_BOX,Plateau repas,70
+catering_type_bar,BAR,Bar / boissons,80
+catering_type_other,OTHER,Autre,900

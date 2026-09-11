@@ -1,0 +1,401 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ================================================================
+         EGP-VIEW-LEAD-003 / EGP-VIEW-OPP-002 : formulaire commun.
+         Le même enregistrement porte la piste puis l'opportunité : les blocs
+         sont donc affichés ou masqués selon le champ natif `type`.
+         ================================================================ -->
+    <record id="crm_lead_view_form_egp" model="ir.ui.view">
+        <field name="name">crm.lead.form.egp</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//group[@name='lead_partner']/field[@name='partner_id']" position="attributes">
+                <!-- Superflu : notre champ ci-dessous (à la place de partner_name)
+                     couvre déjà ce rôle, sans dépendre du mode développeur. -->
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//group[@name='lead_partner']/field[@name='partner_name']" position="replace">
+                <!-- Remplace le champ texte natif : partner_name est de toute façon
+                     auto-rempli depuis partner_id (_compute_partner_name), et la saisie
+                     libre masquait la création automatique d'un contact incomplet lors
+                     de la conversion (cf. EGP-RG-020). -->
+                <field name="partner_id" widget="res_partner_many2one"
+                       string="Contact ou organisation"
+                       placeholder="Rechercher ou créer un contact..."
+                       context="{
+                           'default_name': contact_name or partner_name,
+                           'default_is_company': not contact_name,
+                           'default_phone': phone,
+                           'default_email': email_from,
+                       }"/>
+            </xpath>
+
+            <xpath expr="//header" position="inside">
+                <button name="action_egp_create_framework_event" type="object"
+                        string="Créer un événement sous contrat"
+                        invisible="type == 'lead' or egp_opportunity_type_code != 'FRAMEWORK'"/>
+            </xpath>
+
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_egp_view_duplicate_needs" type="object"
+                        class="oe_stat_button" icon="fa-clone"
+                        invisible="egp_duplicate_need_count == 0">
+                    <field name="egp_duplicate_need_count" widget="statinfo" string="Doublons de besoin"/>
+                </button>
+                <button name="action_egp_view_framework_children" type="object"
+                        class="oe_stat_button" icon="fa-sitemap"
+                        invisible="egp_opportunity_type_code != 'FRAMEWORK'">
+                    <field name="egp_framework_event_count" widget="statinfo" string="Événements"/>
+                </button>
+            </xpath>
+
+            <xpath expr="//sheet" position="before">
+                <div class="alert alert-warning" role="alert"
+                     invisible="type == 'opportunity' or egp_qualification_state != 'incomplete'">
+                    <strong>Qualification incomplète.</strong>
+                    <field name="egp_missing_qualification" nolabel="1" readonly="1" class="mb-0"/>
+                </div>
+            </xpath>
+
+            <xpath expr="//notebook" position="inside">
+
+                <page name="egp_qualification" string="Qualification EGP">
+                    <group>
+                        <group string="Origine">
+                            <field name="egp_creation_mode" readonly="1"/>
+                            <field name="egp_prospector_id" options="{'no_create': True}"/>
+                            <field name="egp_adn_data_ref"/>
+                            <field name="egp_qualification_state" readonly="1" invisible="type == 'opportunity'"/>
+                            <field name="egp_qualified_date" readonly="1" invisible="not egp_qualified_date"/>
+                            <field name="egp_follow_up_date"/>
+                            <field name="egp_inactive_days" readonly="1" invisible="type == 'opportunity'"/>
+                            <field name="egp_is_inactive" readonly="1" invisible="type == 'opportunity'"/>
+                        </group>
+                        <group string="Interlocuteurs">
+                            <field name="egp_secondary_contact_ids" widget="many2many_tags"/>
+                            <field name="egp_intermediation_type" invisible="type == 'lead'"/>
+                            <field name="egp_end_customer_id"
+                                   invisible="egp_intermediation_type != 'agency'"
+                                   required="egp_intermediation_type == 'agency'"/>
+                            <field name="egp_end_customer_contact_id"
+                                   invisible="egp_intermediation_type != 'agency'"
+                                   domain="[('parent_id', '=', egp_end_customer_id)]"/>
+                            <field name="egp_business_introducer_id"
+                                   invisible="egp_intermediation_type != 'introducer'"
+                                   required="egp_intermediation_type == 'introducer'"/>
+                        </group>
+                        <group string="Organisation">
+                            <field name="egp_org_structure_type_id"
+                                   options="{'no_create': True, 'no_create_edit': True}"
+                                   invisible="not partner_id"/>
+                            <field name="egp_org_industry_id"
+                                   options="{'no_create': True, 'no_create_edit': True}"
+                                   invisible="not partner_id"/>
+                        </group>
+                        <group string="Signaux commerciaux">
+                            <field name="egp_temperature_id" options="{'no_create': True, 'no_create_edit': True}"/>
+                            <field name="egp_maturity_id" options="{'no_create': True, 'no_create_edit': True}"
+                                   invisible="type == 'lead'"/>
+                            <field name="egp_is_grand_account"/>
+                            <field name="egp_is_framework_potential"/>
+                            <field name="egp_is_tender"/>
+                            <field name="egp_is_multisite"/>
+                            <field name="egp_is_recurring_event"/>
+                            <field name="egp_has_multiple_needs"/>
+                        </group>
+                        <group string="Contrôle des doublons">
+                            <field name="egp_duplicate_need_count" readonly="1"/>
+                            <field name="egp_duplicate_override" groups="egp_crm.group_egp_sales_manager"/>
+                            <field name="egp_duplicate_override_reason"
+                                   groups="egp_crm.group_egp_sales_manager"
+                                   required="egp_duplicate_override"
+                                   invisible="not egp_duplicate_override"/>
+                        </group>
+                    </group>
+                </page>
+
+                <page name="egp_event" string="Événement">
+                    <group>
+                        <group string="Besoin">
+                            <field name="egp_event_type_id"
+                                   options="{'no_create': True, 'no_create_edit': True}"/>
+                            <field name="egp_market_segment_id"
+                                   options="{'no_create': True, 'no_create_edit': True}"/>
+                            <field name="egp_participant_count"/>
+                            <field name="egp_annual_event_count"/>
+                            <field name="egp_client_budget" widget="monetary"
+                                   options="{'currency_field': 'company_currency'}"/>
+                        </group>
+                        <group string="Dates" name="egp_event_dates">
+                            <field name="egp_event_period_note"/>
+                            <field name="egp_event_start"/>
+                            <field name="egp_event_end"/>
+                            <field name="egp_configuration_id"
+                                   options="{'no_create': True, 'no_create_edit': True}"/>
+                            <field name="egp_setup_required"/>
+                            <field name="egp_setup_start" invisible="not egp_setup_required"
+                                   required="egp_setup_required"/>
+                            <field name="egp_teardown_required"/>
+                            <field name="egp_teardown_end" invisible="not egp_teardown_required"
+                                   required="egp_teardown_required"/>
+                            <field name="egp_occupancy_start" readonly="1"/>
+                            <field name="egp_occupancy_end" readonly="1"/>
+                            <field name="egp_sold_day_count" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="Expression du besoin">
+                        <field name="egp_need_description" nolabel="1" colspan="2"
+                               placeholder="Décrire le besoin exprimé par le client..."/>
+                    </group>
+                    <group string="Contraintes">
+                        <field name="egp_constraints" nolabel="1" colspan="2"
+                               placeholder="Contraintes techniques, logistiques ou horaires..."/>
+                    </group>
+                    <group string="Objectifs du client">
+                        <field name="egp_client_objectives" nolabel="1" colspan="2"
+                               placeholder="Objectifs poursuivis par le client pour cet événement..."/>
+                    </group>
+                </page>
+
+                <page name="egp_services" string="Prestations" invisible="type == 'lead'">
+                    <group>
+                        <group string="Restauration et technique">
+                            <field name="egp_catering_required"/>
+                            <field name="egp_catering_type_ids" widget="many2many_tags"
+                                   invisible="not egp_catering_required"
+                                   options="{'no_create': True, 'no_create_edit': True}"/>
+                            <field name="egp_av_required"/>
+                            <field name="egp_technical_level_id"
+                                   invisible="not egp_av_required"
+                                   options="{'no_create': True, 'no_create_edit': True}"/>
+                        </group>
+                        <group string="Mobilier et animation">
+                            <field name="egp_furniture_required"/>
+                            <field name="egp_furniture_notes" invisible="not egp_furniture_required"/>
+                            <field name="egp_animation_required"/>
+                            <field name="egp_animation_type_ids" widget="many2many_tags"
+                                   invisible="not egp_animation_required"
+                                   options="{'no_create': True, 'no_create_edit': True}"/>
+                        </group>
+                        <group string="Services complémentaires">
+                            <field name="egp_security_required"/>
+                            <field name="egp_reception_required"/>
+                            <field name="egp_parking_required"/>
+                        </group>
+                    </group>
+                    <group string="Autres prestations">
+                        <field name="egp_other_service_notes" nolabel="1"
+                               placeholder="Autres prestations souhaitées..."/>
+                    </group>
+                </page>
+
+                <page name="egp_commercial" string="Suivi commercial" invisible="type == 'lead'">
+                    <group>
+                        <group string="Analyse" name="egp_commercial_analysis">
+                            <field name="egp_decision_date"/>
+                            <field name="egp_competitor_id"/>
+                            <field name="egp_competition_notes"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Motifs de blocage">
+                            <field name="egp_blocking_reasons" nolabel="1"
+                                   placeholder="Freins ou points de blocage identifiés..."/>
+                        </group>
+                        <group string="Risques identifiés">
+                            <field name="egp_risk_notes" nolabel="1"
+                                   placeholder="Risques identifiés sur le dossier..."/>
+                        </group>
+                    </group>
+                    <group string="Notes de management" groups="egp_crm.group_egp_sales_manager">
+                        <field name="egp_management_notes" nolabel="1"
+                               placeholder="Notes réservées à l'encadrement commercial..."/>
+                    </group>
+                </page>
+
+                <page name="egp_framework" string="Contrat cadre" invisible="type == 'lead'">
+                    <group>
+                        <group string="Rattachement">
+                            <field name="egp_opportunity_type_id"
+                                   options="{'no_create': True, 'no_create_edit': True}"/>
+                            <field name="egp_framework_parent_id"
+                                   invisible="egp_opportunity_type_code == 'FRAMEWORK'"/>
+                        </group>
+                        <group string="Accord global" invisible="egp_opportunity_type_code != 'FRAMEWORK'">
+                            <field name="egp_framework_reference"/>
+                            <field name="egp_framework_start_date"/>
+                            <field name="egp_framework_end_date"/>
+                            <field name="egp_framework_target_amount" widget="monetary"
+                                   options="{'currency_field': 'company_currency'}"/>
+                            <field name="egp_framework_target_event_count"/>
+                            <field name="egp_framework_event_count" readonly="1"/>
+                            <field name="egp_framework_signed_amount" widget="monetary" readonly="1"
+                                   options="{'currency_field': 'company_currency'}"/>
+                        </group>
+                    </group>
+                    <field name="egp_framework_child_ids" readonly="1"
+                           invisible="egp_opportunity_type_code != 'FRAMEWORK'">
+                        <list string="Événements sous contrat">
+                            <field name="name"/>
+                            <field name="egp_event_start"/>
+                            <field name="stage_id"/>
+                            <field name="expected_revenue" widget="monetary"/>
+                            <field name="company_currency" column_invisible="True"/>
+                        </list>
+                    </field>
+                </page>
+
+                <page name="egp_admin" string="Administratif" invisible="type == 'lead'"
+                      groups="egp_crm.group_egp_adv,egp_crm.group_egp_sales_manager">
+                    <group>
+                        <group>
+                            <field name="egp_admin_status_id"
+                                   options="{'no_create': True, 'no_create_edit': True}"/>
+                            <field name="egp_admin_complete"/>
+                            <field name="egp_admin_complete_date"/>
+                            <field name="egp_admin_closure_date"/>
+                        </group>
+                    </group>
+                    <group string="Notes ADV">
+                        <field name="egp_adv_notes" nolabel="1" placeholder="Notes internes ADV..."/>
+                    </group>
+                </page>
+
+            </xpath>
+
+            <xpath expr="//notebook" position="before">
+                <field name="egp_opportunity_type_code" invisible="1"/>
+            </xpath>
+
+        </field>
+    </record>
+
+    <!-- Badges Kanban — §9.3 et §9.4 -->
+    <record id="crm_case_kanban_view_leads_egp" model="ir.ui.view">
+        <field name="name">crm.lead.kanban.egp</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_case_kanban_view_leads"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='tag_ids']" position="after">
+                <field name="egp_event_type_id" invisible="not egp_event_type_id"/>
+                <field name="egp_event_start" widget="date" invisible="not egp_event_start"/>
+                <div class="d-flex flex-wrap gap-1 o_egp_lead_badges">
+                    <span class="badge text-bg-warning" invisible="not egp_is_grand_account"
+                          title="Grand compte">Grand compte</span>
+                    <span class="badge text-bg-info" invisible="not egp_is_framework_potential"
+                          title="Contrat cadre potentiel">Contrat cadre</span>
+                    <span class="badge text-bg-secondary" invisible="not egp_is_tender"
+                          title="Appel d'offres">Appel d'offres</span>
+                    <span class="badge text-bg-secondary" invisible="not egp_is_recurring_event"
+                          title="Événements récurrents">Récurrent</span>
+                    <span class="badge text-bg-danger" invisible="egp_qualification_state != 'incomplete'"
+                          title="Qualification incomplète">À qualifier</span>
+                    <span class="badge text-bg-warning" invisible="not egp_is_deposit_pending"
+                          title="Acompte en attente">Acompte en attente</span>
+                    <span class="badge text-bg-danger" invisible="not egp_is_at_risk"
+                          title="Dossier à risque">Dossier à risque</span>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- EGP-VIEW-LEAD-004 : liste des pistes -->
+    <record id="crm_case_tree_view_leads_egp" model="ir.ui.view">
+        <field name="name">crm.lead.list.lead.egp</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_case_tree_view_leads"/>
+        <field name="arch" type="xml">
+            <field name="team_id" position="after">
+                <field name="egp_prospector_id" optional="show" widget="many2one_avatar_user"/>
+                <field name="egp_temperature_id" optional="show"/>
+                <field name="egp_event_type_id" optional="show"/>
+                <field name="egp_qualification_state" optional="show"/>
+                <field name="egp_follow_up_date" optional="show"/>
+                <field name="egp_inactive_days" optional="hide"/>
+                <field name="egp_is_grand_account" optional="hide"/>
+                <field name="egp_is_framework_potential" optional="hide"/>
+                <field name="egp_is_tender" optional="hide"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- EGP-VIEW-LEAD-006 : recherche et filtres Prospecteur / Responsable -->
+    <record id="view_crm_case_leads_filter_egp" model="ir.ui.view">
+        <field name="name">crm.lead.search.lead.egp</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.view_crm_case_leads_filter"/>
+        <field name="arch" type="xml">
+            <field name="user_id" position="after">
+                <field name="egp_prospector_id"/>
+                <field name="egp_event_type_id"/>
+                <field name="egp_temperature_id"/>
+            </field>
+            <filter name="unassigned_leads" position="after">
+                <separator/>
+                <filter name="egp_my_leads" string="Mes pistes"
+                        domain="[('egp_prospector_id', '=', uid)]"/>
+                <filter name="egp_ready_to_convert" string="Qualifiées à convertir"
+                        domain="[('egp_qualification_state', '=', 'ready')]"/>
+                <filter name="egp_incomplete" string="Qualification incomplète"
+                        domain="[('egp_qualification_state', '=', 'incomplete')]"/>
+                <filter name="egp_follow_up_today" string="À relancer aujourd'hui"
+                        domain="[('egp_follow_up_date', '&lt;=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter name="egp_inactive" string="Pistes inactives"
+                        domain="[('egp_is_inactive', '=', True)]"/>
+                <separator/>
+                <filter name="egp_grand_account" string="Grands comptes"
+                        domain="[('egp_is_grand_account', '=', True)]"/>
+                <filter name="egp_framework_potential" string="Contrats cadres potentiels"
+                        domain="[('egp_is_framework_potential', '=', True)]"/>
+                <filter name="egp_tender" string="Appels d'offres"
+                        domain="[('egp_is_tender', '=', True)]"/>
+                <separator/>
+                <filter name="egp_no_phone" string="Sans téléphone" domain="[('phone', '=', False)]"/>
+                <filter name="egp_no_email" string="Sans e-mail" domain="[('email_from', '=', False)]"/>
+            </filter>
+            <xpath expr="//group" position="inside">
+                <filter name="egp_group_by_prospector" string="Prospecteur"
+                        context="{'group_by': 'egp_prospector_id'}"/>
+                <filter name="egp_group_by_temperature" string="Température"
+                        context="{'group_by': 'egp_temperature_id'}"/>
+                <filter name="egp_group_by_event_type" string="Type d'événement"
+                        context="{'group_by': 'egp_event_type_id'}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- EGP-VIEW-LEAD-001 : action Pistes cadrée sur l'équipe de prospection -->
+    <record id="action_egp_leads" model="ir.actions.act_window">
+        <field name="name">Pistes de prospection</field>
+        <field name="res_model">crm.lead</field>
+        <field name="view_mode">kanban,list,form,activity,pivot,graph</field>
+        <field name="domain">[('type', '=', 'lead')]</field>
+        <!-- default_team_id est indispensable : _read_group_stage_ids (natif) s'en sert
+             pour savoir quelles colonnes d'étapes afficher dans le Kanban, pas seulement
+             comme valeur par défaut de création. -->
+        <field name="context" eval="{
+            'default_type': 'lead',
+            'default_team_id': ref('egp_crm.crm_team_egp_outbound'),
+            'default_egp_creation_mode': 'outbound',
+            'search_default_egp_my_leads': 1,
+        }"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Créez votre première piste de prospection</p>
+            <p>Une piste représente exclusivement une action de prospection sortante :
+               réactivation de la base clients, recherche commerciale ou import ADN Data.</p>
+        </field>
+    </record>
+
+    <record id="action_egp_lead_activities" model="ir.actions.act_window">
+        <field name="name">Activités de prospection</field>
+        <field name="res_model">crm.lead</field>
+        <field name="view_mode">activity,list,form</field>
+        <field name="domain">[('type', '=', 'lead')]</field>
+        <field name="context">{'default_type': 'lead'}</field>
+    </record>
+
+</odoo>

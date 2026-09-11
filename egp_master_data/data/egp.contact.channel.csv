@@ -1,0 +1,6 @@
+id,code,name,sequence
+contact_channel_phone,PHONE,Téléphone,10
+contact_channel_email,EMAIL,E-mail,20
+contact_channel_mobile_sms,MOBILE_SMS,Mobile / SMS,30
+contact_channel_video,VIDEO_CALL,Visioconférence,40
+contact_channel_other,OTHER,Autre,900

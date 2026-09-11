@@ -1,0 +1,5 @@
+id,code,name,sequence
+technical_level_basic,BASIC,Sonorisation et vidéo de base,10
+technical_level_standard,STANDARD,Standard,20
+technical_level_advanced,ADVANCED,Avancé,30
+technical_level_broadcast,BROADCAST,Diffusion / captation professionnelle,40

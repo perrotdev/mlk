@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+        §11.3 — Les ACL et règles Odoo sont additives : il est impossible de
+        restreindre par une règle EGP ce qu'une règle standard plus large a
+        déjà accordé. Les règles CRM natives « documents personnels » et
+        « tous les documents » sont donc neutralisées au profit des règles EGP.
+    -->
+    <record id="crm.crm_rule_personal_lead" model="ir.rule">
+        <field name="active" eval="False"/>
+    </record>
+    <record id="crm.crm_rule_all_lead" model="ir.rule">
+        <field name="active" eval="False"/>
+    </record>
+
+    <data noupdate="1">
+
+        <!-- EGP-SEC-002 : le Prospecteur lit ses pistes et les opportunités qui en sont issues -->
+        <record id="rule_egp_prospector_read" model="ir.rule">
+            <field name="name">EGP Prospecteur : lecture</field>
+            <field name="model_id" ref="crm.model_crm_lead"/>
+            <field name="domain_force">['|',
+                '&amp;', ('type', '=', 'lead'), ('egp_prospector_id', '=', user.id),
+                '&amp;', ('type', '=', 'opportunity'),
+                    '|', ('egp_prospector_id', '=', user.id), ('user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('egp_crm.group_egp_prospector'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- EGP-SEC-003 : il ne modifie que ses pistes et les opportunités qui lui sont affectées -->
+        <record id="rule_egp_prospector_write" model="ir.rule">
+            <field name="name">EGP Prospecteur : création et modification</field>
+            <field name="model_id" ref="crm.model_crm_lead"/>
+            <field name="domain_force">['|',
+                '&amp;', ('type', '=', 'lead'), ('egp_prospector_id', '=', user.id),
+                '&amp;', ('type', '=', 'opportunity'), ('user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('egp_crm.group_egp_prospector'))]"/>
+            <field name="perm_read" eval="False"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+
+        <!-- EGP-SEC-004 / EGP-DEC-028 : lecture de l'équipe, écriture sur ses propres dossiers -->
+        <record id="rule_egp_salesperson_read" model="ir.rule">
+            <field name="name">EGP Commercial : lecture de son équipe</field>
+            <field name="model_id" ref="crm.model_crm_lead"/>
+            <field name="domain_force">[('type', '=', 'opportunity'),
+                '|', ('user_id', '=', user.id), ('team_id.member_ids', 'in', [user.id])]</field>
+            <field name="groups" eval="[(4, ref('egp_crm.group_egp_salesperson'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <record id="rule_egp_salesperson_write" model="ir.rule">
+            <field name="name">EGP Commercial : modification de ses opportunités</field>
+            <field name="model_id" ref="crm.model_crm_lead"/>
+            <field name="domain_force">[('type', '=', 'opportunity'), ('user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('egp_crm.group_egp_salesperson'))]"/>
+            <field name="perm_read" eval="False"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+
+        <!-- EGP-SEC-005 : accès global de la Responsable commerciale sur ses sociétés -->
+        <record id="rule_egp_sales_manager_all" model="ir.rule">
+            <field name="name">EGP Responsable commerciale : accès global</field>
+            <field name="model_id" ref="crm.model_crm_lead"/>
+            <field name="domain_force">[('company_id', 'in', company_ids + [False])]</field>
+            <field name="groups" eval="[(4, ref('egp_crm.group_egp_sales_manager'))]"/>
+        </record>
+
+        <!-- EGP-SEC-006 : l'ADV lit tout ; le serveur limite ses champs modifiables (§11.9.1) -->
+        <record id="rule_egp_adv_all" model="ir.rule">
+            <field name="name">EGP ADV : opportunités de ses sociétés</field>
+            <field name="model_id" ref="crm.model_crm_lead"/>
+            <field name="domain_force">[('type', '=', 'opportunity'), ('company_id', 'in', company_ids + [False])]</field>
+            <field name="groups" eval="[(4, ref('egp_crm.group_egp_adv'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- EGP-SEC-007 : la Direction est en lecture seule -->
+        <record id="rule_egp_direction_read" model="ir.rule">
+            <field name="name">EGP Direction : lecture globale</field>
+            <field name="model_id" ref="crm.model_crm_lead"/>
+            <field name="domain_force">[('company_id', 'in', company_ids + [False])]</field>
+            <field name="groups" eval="[(4, ref('egp_crm.group_egp_direction'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+    </data>
+</odoo>

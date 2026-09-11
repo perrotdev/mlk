@@ -1,0 +1,9 @@
+id,code,name,sequence
+event_configuration_theater,THEATER,Théâtre,10
+event_configuration_classroom,CLASSROOM,Classe,20
+event_configuration_u_shape,U_SHAPE,En U,30
+event_configuration_boardroom,BOARDROOM,Conseil,40
+event_configuration_cocktail,COCKTAIL,Cocktail,50
+event_configuration_banquet,BANQUET,Banquet,60
+event_configuration_standing,STANDING,Debout,70
+event_configuration_custom,CUSTOM,Configuration spécifique,900

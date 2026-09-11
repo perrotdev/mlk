@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- §3.5 : deux équipes distinctes pour ne pas mélanger les deux pipelines -->
+        <record id="crm_team_egp_outbound" model="crm.team">
+            <field name="name">Prospection sortante</field>
+            <field name="sequence">1</field>
+            <field name="use_leads" eval="True"/>
+            <field name="use_opportunities" eval="False"/>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="crm_team_egp_commercial" model="crm.team">
+            <field name="name">Commercial EGP</field>
+            <field name="sequence">2</field>
+            <field name="use_leads" eval="False"/>
+            <field name="use_opportunities" eval="True"/>
+            <field name="company_id" eval="False"/>
+        </record>
+
+    </data>
+</odoo>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- Sources autorisées pour la prospection sortante (§8.8) -->
+        <record id="utm_source_egp_reactivation" model="utm.source">
+            <field name="name">Réactivation base clients</field>
+        </record>
+        <record id="utm_source_egp_research" model="utm.source">
+            <field name="name">Recherche commerciale</field>
+        </record>
+        <record id="utm_source_egp_adn_data" model="utm.source">
+            <field name="name">ADN Data</field>
+        </record>
+
+        <!-- Sources créant directement une opportunité -->
+        <record id="utm_source_egp_web_form" model="utm.source">
+            <field name="name">Formulaire web</field>
+        </record>
+        <record id="utm_source_egp_inbound_phone" model="utm.source">
+            <field name="name">Appel entrant</field>
+        </record>
+        <record id="utm_source_egp_inbound_email" model="utm.source">
+            <field name="name">E-mail entrant</field>
+        </record>
+        <record id="utm_source_egp_referral" model="utm.source">
+            <field name="name">Recommandation</field>
+        </record>
+        <record id="utm_source_egp_existing_customer" model="utm.source">
+            <field name="name">Nouvelle demande client existant</field>
+        </record>
+
+        <record id="utm_medium_egp_phone" model="utm.medium">
+            <field name="name">Téléphone</field>
+        </record>
+        <record id="utm_medium_egp_linkedin" model="utm.medium">
+            <field name="name">LinkedIn</field>
+        </record>
+        <record id="utm_medium_egp_trade_show" model="utm.medium">
+            <field name="name">Salon professionnel</field>
+        </record>
+
+    </data>
+</odoo>

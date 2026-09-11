@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Ouverture par défaut du module CRM selon le rôle (§9.1) : le Prospecteur
+         atterrit sur ses Pistes, les autres rôles sur leur portefeuille d'opportunités. -->
+    <record id="action_egp_crm_default_redirect" model="ir.actions.server">
+        <field name="name">CRM</field>
+        <field name="model_id" ref="crm.model_crm_lead"/>
+        <field name="state">code</field>
+        <field name="code">
+if (
+    user.has_group('egp_crm.group_egp_salesperson')
+    or user.has_group('egp_crm.group_egp_sales_manager')
+    or user.has_group('egp_crm.group_egp_adv')
+    or user.has_group('egp_crm.group_egp_direction')
+):
+    action = env['ir.actions.act_window']._for_xml_id('egp_crm.action_egp_my_pipeline')
+elif user.has_group('egp_crm.group_egp_prospector'):
+    action = env['ir.actions.act_window']._for_xml_id('egp_crm.action_egp_leads')
+else:
+    action = env['ir.actions.act_window']._for_xml_id('egp_crm.action_egp_my_pipeline')
+        </field>
+    </record>
+
+    <menuitem id="crm.crm_menu_root" action="action_egp_crm_default_redirect"/>
+
+    <!-- Architecture des menus CRM — spécification §9.1 -->
+    <menuitem id="menu_egp_prospection"
+        name="Prospection"
+        parent="crm.crm_menu_root"
+        groups="egp_crm.group_egp_prospector,egp_crm.group_egp_sales_manager,egp_crm.group_egp_direction"
+        sequence="3"/>
+
+    <menuitem id="menu_egp_leads"
+        name="Pistes"
+        parent="menu_egp_prospection"
+        action="action_egp_leads"
+        sequence="10"/>
+
+    <menuitem id="menu_egp_lead_activities"
+        name="Activités de prospection"
+        parent="menu_egp_prospection"
+        action="action_egp_lead_activities"
+        sequence="20"/>
+
+    <menuitem id="menu_egp_opportunities_root"
+        name="Opportunités EGP"
+        parent="crm.crm_menu_root"
+        groups="egp_crm.group_egp_salesperson,egp_crm.group_egp_adv,egp_crm.group_egp_sales_manager,egp_crm.group_egp_direction"
+        sequence="4"/>
+
+    <menuitem id="menu_egp_my_pipeline"
+        name="Mon portefeuille"
+        parent="menu_egp_opportunities_root"
+        action="action_egp_my_pipeline"
+        sequence="10"/>
+
+    <menuitem id="menu_egp_all_opportunities"
+        name="Toutes les opportunités"
+        parent="menu_egp_opportunities_root"
+        action="action_egp_opportunities"
+        sequence="20"/>
+
+    <menuitem id="menu_egp_event_calendar"
+        name="Calendrier des événements"
+        parent="menu_egp_opportunities_root"
+        action="action_egp_event_calendar"
+        sequence="30"/>
+
+    <menuitem id="menu_egp_pipeline_analysis"
+        name="Analyse du pipeline"
+        parent="menu_egp_opportunities_root"
+        action="action_egp_pipeline_analysis"
+        sequence="40"/>
+
+    <menuitem id="menu_egp_framework_contracts"
+        name="Contrats cadres"
+        parent="crm.crm_menu_root"
+        action="action_egp_framework_contracts"
+        groups="egp_crm.group_egp_salesperson,egp_crm.group_egp_sales_manager,egp_crm.group_egp_direction"
+        sequence="5"/>
+
+</odoo>

@@ -1,0 +1,5 @@
+id,code,name,sequence,description
+maturity_level_exploratory,EXPLORATORY,Exploratoire,10,Besoin évoqué sans projet formalisé.
+maturity_level_defined,DEFINED,Besoin défini,20,Besoin cadré mais budget ou décision non arrêtés.
+maturity_level_budgeted,BUDGETED,Budgété,30,Budget identifié et validé côté client.
+maturity_level_decision,DECISION_IMMINENT,Décision imminente,40,Décision attendue à court terme.

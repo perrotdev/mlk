@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- Pipeline Pistes — §3.4 -->
+        <record id="crm_stage_egp_lead_new" model="crm.stage">
+            <field name="name">Nouvelle</field>
+            <field name="egp_code">LEAD_NEW</field>
+            <field name="sequence">10</field>
+            <field name="team_ids" eval="[(6, 0, [ref('crm_team_egp_outbound')])]"/>
+        </record>
+
+        <record id="crm_stage_egp_lead_qualifying" model="crm.stage">
+            <field name="name">En cours de qualification</field>
+            <field name="egp_code">LEAD_QUALIFYING</field>
+            <field name="sequence">20</field>
+            <field name="team_ids" eval="[(6, 0, [ref('crm_team_egp_outbound')])]"/>
+        </record>
+
+        <record id="crm_stage_egp_lead_follow_up" model="crm.stage">
+            <field name="name">En attente / À relancer</field>
+            <field name="egp_code">LEAD_FOLLOW_UP</field>
+            <field name="sequence">30</field>
+            <field name="team_ids" eval="[(6, 0, [ref('crm_team_egp_outbound')])]"/>
+        </record>
+
+        <record id="crm_stage_egp_lead_qualified" model="crm.stage">
+            <field name="name">Qualifiée</field>
+            <field name="egp_code">LEAD_QUALIFIED</field>
+            <field name="sequence">40</field>
+            <field name="team_ids" eval="[(6, 0, [ref('crm_team_egp_outbound')])]"/>
+        </record>
+
+        <!-- Pipeline Opportunités — les quatre étapes post-gain sont `is_won` (EGP-DEC-042) -->
+        <record id="crm_stage_egp_opp_new" model="crm.stage">
+            <field name="name">Nouvelle / À qualifier</field>
+            <field name="egp_code">OPP_NEW</field>
+            <field name="sequence">110</field>
+            <field name="team_ids" eval="[(6, 0, [ref('crm_team_egp_commercial')])]"/>
+        </record>
+
+        <record id="crm_stage_egp_opp_qualified" model="crm.stage">
+            <field name="name">Qualifiée</field>
+            <field name="egp_code">OPP_QUALIFIED</field>
+            <field name="sequence">120</field>
+            <field name="rotting_threshold_days">15</field>
+            <field name="team_ids" eval="[(6, 0, [ref('crm_team_egp_commercial')])]"/>
+        </record>
+
+        <record id="crm_stage_egp_opp_proposal" model="crm.stage">
+            <field name="name">Proposition commerciale</field>
+            <field name="egp_code">OPP_PROPOSAL</field>
+            <field name="sequence">130</field>
+            <field name="rotting_threshold_days">15</field>
+            <field name="team_ids" eval="[(6, 0, [ref('crm_team_egp_commercial')])]"/>
+        </record>
+
+        <record id="crm_stage_egp_opp_negotiation" model="crm.stage">
+            <field name="name">Négociation</field>
+            <field name="egp_code">OPP_NEGOTIATION</field>
+            <field name="sequence">140</field>
+            <field name="rotting_threshold_days">10</field>
+            <field name="team_ids" eval="[(6, 0, [ref('crm_team_egp_commercial')])]"/>
+        </record>
+
+        <record id="crm_stage_egp_opp_won" model="crm.stage">
+            <field name="name">Gagnée / Commande confirmée</field>
+            <field name="egp_code">OPP_WON</field>
+            <field name="sequence">150</field>
+            <field name="is_won" eval="True"/>
+            <field name="team_ids" eval="[(6, 0, [ref('crm_team_egp_commercial')])]"/>
+        </record>
+
+        <record id="crm_stage_egp_opp_deposit_paid" model="crm.stage">
+            <field name="name">Acompte versé</field>
+            <field name="egp_code">OPP_DEPOSIT_PAID</field>
+            <field name="sequence">160</field>
+            <field name="is_won" eval="True"/>
+            <field name="team_ids" eval="[(6, 0, [ref('crm_team_egp_commercial')])]"/>
+        </record>
+
+        <record id="crm_stage_egp_opp_event_done" model="crm.stage">
+            <field name="name">Événement réalisé</field>
+            <field name="egp_code">OPP_EVENT_DONE</field>
+            <field name="sequence">170</field>
+            <field name="is_won" eval="True"/>
+            <field name="team_ids" eval="[(6, 0, [ref('crm_team_egp_commercial')])]"/>
+        </record>
+
+        <record id="crm_stage_egp_opp_closed" model="crm.stage">
+            <field name="name">Clôturée</field>
+            <field name="egp_code">OPP_CLOSED</field>
+            <field name="sequence">180</field>
+            <field name="is_won" eval="True"/>
+            <field name="fold" eval="True"/>
+            <field name="team_ids" eval="[(6, 0, [ref('crm_team_egp_commercial')])]"/>
+        </record>
+
+    </data>
+</odoo>

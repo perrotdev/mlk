@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="crm_lead_view_form_egp_sale_project" model="ir.ui.view">
+        <field name="name">crm.lead.form.egp.sale.project</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="egp_crm.crm_lead_view_form_egp"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_egp_view_projects" type="object"
+                        class="oe_stat_button" icon="fa-tasks"
+                        invisible="type == 'lead'">
+                    <field name="egp_order_count" widget="statinfo" string="Commandes"/>
+                </button>
+            </xpath>
+
+            <xpath expr="//page[@name='egp_commercial']" position="after">
+                <page name="egp_finance" string="Ventes et facturation" invisible="type == 'lead'">
+                    <group>
+                        <group string="Ventes">
+                            <field name="egp_quotation_count" readonly="1"/>
+                            <field name="egp_order_count" readonly="1"/>
+                            <field name="egp_first_quotation_sent_date" readonly="1"/>
+                            <field name="egp_signed_revenue" widget="monetary" readonly="1"
+                                   options="{'currency_field': 'company_currency'}"/>
+                        </group>
+                        <group string="Facturation">
+                            <field name="egp_invoiced_revenue" widget="monetary" readonly="1"
+                                   options="{'currency_field': 'company_currency'}"/>
+                            <field name="egp_paid_revenue" widget="monetary" readonly="1"
+                                   options="{'currency_field': 'company_currency'}"/>
+                        </group>
+                        <group string="Production">
+                            <field name="egp_main_project_id" readonly="1"/>
+                            <field name="egp_project_status" readonly="1"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

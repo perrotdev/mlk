@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Espaces, disponibilité et option sur le formulaire commun (§7.3, §7.6) -->
+    <record id="crm_lead_view_form_egp_rental" model="ir.ui.view">
+        <field name="name">crm.lead.form.egp.rental</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="egp_crm.crm_lead_view_form_egp"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//header" position="inside">
+                <button name="action_egp_option_confirm" type="object"
+                        string="Confirmer l'option"
+                        invisible="not egp_option_active or egp_option_status == 'confirmed'"/>
+                <button name="action_egp_option_release" type="object"
+                        string="Libérer l'option"
+                        invisible="not egp_option_active"/>
+            </xpath>
+
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_egp_check_space_availability" type="object"
+                        class="oe_stat_button" icon="fa-calendar-check-o"
+                        string="Vérifier la disponibilité"
+                        invisible="not egp_space_ids"/>
+                <button name="action_egp_view_space_bookings" type="object"
+                        class="oe_stat_button" icon="fa-building"
+                        invisible="egp_space_booking_count == 0">
+                    <field name="egp_space_booking_count" widget="statinfo" string="Réservations"/>
+                </button>
+            </xpath>
+
+            <xpath expr="//sheet" position="before">
+                <div class="alert alert-danger" role="alert"
+                     invisible="egp_option_status not in ('expiring', 'expired')">
+                    L'option arrive à échéance ou est expirée : une décision est attendue.
+                </div>
+            </xpath>
+
+            <!-- La disponibilité est informative : elle ne pose aucune réservation. -->
+            <xpath expr="//group[@name='egp_event_dates']" position="after">
+                <group string="Espaces envisagés">
+                    <field name="egp_space_ids" widget="many2many_tags"
+                           options="{'no_create': True, 'no_create_edit': True}"/>
+                    <field name="egp_main_space_id"
+                           domain="[('id', 'in', egp_space_ids)]"
+                           options="{'no_create': True, 'no_create_edit': True}"/>
+                    <field name="egp_space_availability_state" readonly="1"
+                           decoration-success="egp_space_availability_state == 'available'"
+                           decoration-warning="egp_space_availability_state == 'partial'"
+                           decoration-danger="egp_space_availability_state == 'conflict'"
+                           decoration-muted="egp_space_availability_state == 'unknown'"/>
+                </group>
+            </xpath>
+
+            <xpath expr="//group[@name='egp_commercial_analysis']" position="after">
+                <group string="Option" groups="egp_crm.group_egp_salesperson">
+                    <field name="egp_option_active"/>
+                    <field name="egp_option_status" readonly="1"/>
+                    <field name="egp_option_start" invisible="not egp_option_active"
+                           required="egp_option_active"/>
+                    <field name="egp_option_end" invisible="not egp_option_active"
+                           required="egp_option_active"/>
+                    <field name="egp_option_space_ids" widget="many2many_tags"
+                           invisible="not egp_option_active"
+                           required="egp_option_active"
+                           options="{'no_create': True, 'no_create_edit': True}"/>
+                    <field name="egp_option_decision_date" readonly="1"/>
+                    <field name="egp_option_notes"/>
+                </group>
+            </xpath>
+
+            <xpath expr="//notebook" position="before">
+                <field name="egp_option_active" invisible="1"/>
+                <field name="egp_option_status" invisible="1"/>
+                <field name="egp_space_booking_count" invisible="1"/>
+            </xpath>
+
+        </field>
+    </record>
+
+    <record id="crm_case_kanban_view_leads_egp_rental" model="ir.ui.view">
+        <field name="name">crm.lead.kanban.egp.rental</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="egp_crm.crm_case_kanban_view_leads_egp"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[hasclass('o_egp_lead_badges')]" position="inside">
+                <field name="egp_option_urgency" invisible="1"/>
+                <span class="badge text-bg-success" invisible="egp_option_urgency != 'ok'"
+                      title="Option en cours">Option</span>
+                <span class="badge text-bg-warning" invisible="egp_option_urgency != 'warning'"
+                      title="Option en cours">Option</span>
+                <span class="badge text-bg-danger" invisible="egp_option_urgency != 'urgent'"
+                      title="Option en cours">Option</span>
+                <span class="badge text-bg-danger" invisible="egp_option_urgency != 'expired'"
+                      title="Option expirée">Option expirée !</span>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="crm_case_tree_view_oppor_egp_rental" model="ir.ui.view">
+        <field name="name">crm.lead.list.opportunity.egp.rental</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="egp_crm.crm_case_tree_view_oppor_egp"/>
+        <field name="arch" type="xml">
+            <field name="egp_admin_status_id" position="before">
+                <field name="egp_main_space_id" optional="show"/>
+                <field name="egp_option_status" optional="hide"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_crm_case_opportunities_filter_egp_rental" model="ir.ui.view">
+        <field name="name">crm.lead.search.opportunity.egp.rental</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="egp_crm.view_crm_case_opportunities_filter_egp"/>
+        <field name="arch" type="xml">
+            <filter name="egp_grand_account" position="before">
+                <filter name="egp_option_active" string="Options en cours"
+                        domain="[('egp_option_active', '=', True)]"/>
+                <filter name="egp_option_expiring" string="Options à échéance"
+                        domain="[('egp_option_status', 'in', ('expiring', 'expired'))]"/>
+                <separator/>
+            </filter>
+            <filter name="egp_group_by_event_month" position="after">
+                <filter name="egp_group_by_main_space" string="Espace principal"
+                        context="{'group_by': 'egp_main_space_id'}"/>
+            </filter>
+        </field>
+    </record>
+
+    <!-- EGP-RG-034D : bandeau non bloquant, mise à jour déclenchée manuellement -->
+    <record id="sale_order_view_form_egp_rental" model="ir.ui.view">
+        <field name="name">sale.order.form.egp.rental</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="before">
+                <div class="alert alert-warning" role="alert"
+                     invisible="egp_rental_dates_synced or not opportunity_id">
+                    Les dates de location diffèrent de la période qualifiée sur l'opportunité.
+                    <button name="action_egp_sync_rental_dates" type="object"
+                            class="btn btn-link p-0 align-baseline"
+                            string="Mettre à jour les dates de location"/>
+                </div>
+                <field name="egp_rental_dates_synced" invisible="1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_egp_space_availability" model="ir.actions.act_window">
+        <field name="name">Disponibilité des espaces</field>
+        <field name="res_model">planning.slot</field>
+        <field name="view_mode">gantt,calendar,list,form</field>
+        <field name="context">{'search_default_group_by_resource': 1}</field>
+    </record>
+
+</odoo>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="crm_stage_tree_egp" model="ir.ui.view">
+        <field name="name">crm.stage.list.egp</field>
+        <field name="model">crm.stage</field>
+        <field name="inherit_id" ref="crm.crm_stage_tree"/>
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="egp_code" readonly="1" optional="show"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="crm_stage_form_egp" model="ir.ui.view">
+        <field name="name">crm.stage.form.egp</field>
+        <field name="model">crm.stage</field>
+        <field name="inherit_id" ref="crm.crm_stage_form"/>
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="egp_code" groups="base.group_system"/>
+            </field>
+        </field>
+    </record>
+
+</odoo>

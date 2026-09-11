@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- Organisations de démonstration -->
+        <record id="demo_org_alliance_capital" model="res.partner">
+            <field name="name">Alliance Capital Banque</field>
+            <field name="is_company" eval="True"/>
+            <field name="egp_structure_type_id" ref="egp_master_data.structure_type_company"/>
+            <field name="industry_id" ref="egp_master_data.industry_egp_banking"/>
+            <field name="egp_activity_id" ref="egp_master_data.activity_egp_bank"/>
+            <field name="egp_company_size_id" ref="egp_master_data.company_size_large"/>
+            <field name="egp_primary_relation_id" ref="egp_master_data.partner_relation_customer"/>
+            <field name="egp_client_status_id" ref="egp_master_data.client_status_active_customer"/>
+            <field name="street">12 avenue de l'Opéra</field>
+            <field name="zip">75001</field>
+            <field name="city">Paris</field>
+            <field name="country_id" ref="base.fr"/>
+            <field name="phone">+33 1 42 96 10 20</field>
+            <field name="email">contact@alliance-capital-demo.fr</field>
+        </record>
+
+        <record id="demo_contact_alliance_capital" model="res.partner">
+            <field name="name">Camille Dupont</field>
+            <field name="parent_id" ref="demo_org_alliance_capital"/>
+            <field name="function">Directrice Communication</field>
+            <field name="egp_department_id" ref="egp_master_data.contact_department_communication_management"/>
+            <field name="email">camille.dupont@alliance-capital-demo.fr</field>
+            <field name="phone">+33 1 42 96 10 21</field>
+        </record>
+
+        <record id="demo_org_petanque_federation" model="res.partner">
+            <field name="name">Fédération Nationale de Pétanque</field>
+            <field name="is_company" eval="True"/>
+            <field name="egp_structure_type_id" ref="egp_master_data.structure_type_association"/>
+            <field name="industry_id" ref="egp_master_data.industry_egp_sport"/>
+            <field name="egp_activity_id" ref="egp_master_data.activity_egp_sports_federation"/>
+            <field name="egp_company_size_id" ref="egp_master_data.company_size_medium"/>
+            <field name="egp_primary_relation_id" ref="egp_master_data.partner_relation_prospect"/>
+            <field name="egp_client_status_id" ref="egp_master_data.client_status_prospect"/>
+            <field name="street">8 rue du Stade</field>
+            <field name="zip">69003</field>
+            <field name="city">Lyon</field>
+            <field name="country_id" ref="base.fr"/>
+            <field name="phone">+33 4 78 60 10 10</field>
+            <field name="email">contact@petanque-federation-demo.fr</field>
+        </record>
+
+        <record id="demo_contact_petanque_federation" model="res.partner">
+            <field name="name">Julien Martin</field>
+            <field name="parent_id" ref="demo_org_petanque_federation"/>
+            <field name="function">Chargé d'événementiel</field>
+            <field name="egp_department_id" ref="egp_master_data.contact_department_events"/>
+            <field name="email">julien.martin@petanque-federation-demo.fr</field>
+            <field name="phone">+33 4 78 60 10 11</field>
+        </record>
+
+        <record id="demo_org_mairie_vernon" model="res.partner">
+            <field name="name">Mairie de Vernon</field>
+            <field name="is_company" eval="True"/>
+            <field name="egp_structure_type_id" ref="egp_master_data.structure_type_local_authority"/>
+            <field name="industry_id" ref="egp_master_data.industry_egp_institutional"/>
+            <field name="egp_activity_id" ref="egp_master_data.activity_egp_city_hall"/>
+            <field name="egp_company_size_id" ref="egp_master_data.company_size_medium"/>
+            <field name="egp_primary_relation_id" ref="egp_master_data.partner_relation_institution"/>
+            <field name="egp_client_status_id" ref="egp_master_data.client_status_prospect"/>
+            <field name="street">Place Barye</field>
+            <field name="zip">27200</field>
+            <field name="city">Vernon</field>
+            <field name="country_id" ref="base.fr"/>
+            <field name="phone">+33 2 32 64 30 00</field>
+            <field name="email">contact@mairie-vernon-demo.fr</field>
+        </record>
+
+        <record id="demo_contact_mairie_vernon" model="res.partner">
+            <field name="name">Sophie Bernard</field>
+            <field name="parent_id" ref="demo_org_mairie_vernon"/>
+            <field name="function">Directrice de cabinet</field>
+            <field name="egp_department_id" ref="egp_master_data.contact_department_general_management"/>
+            <field name="email">sophie.bernard@mairie-vernon-demo.fr</field>
+            <field name="phone">+33 2 32 64 30 01</field>
+        </record>
+
+        <record id="demo_org_diocese_lyon" model="res.partner">
+            <field name="name">Diocèse de Lyon</field>
+            <field name="is_company" eval="True"/>
+            <field name="egp_structure_type_id" ref="egp_master_data.structure_type_association"/>
+            <field name="industry_id" ref="egp_master_data.industry_egp_worship"/>
+            <field name="egp_activity_id" ref="egp_master_data.activity_egp_diocese"/>
+            <field name="egp_company_size_id" ref="egp_master_data.company_size_small"/>
+            <field name="egp_primary_relation_id" ref="egp_master_data.partner_relation_prospect"/>
+            <field name="egp_client_status_id" ref="egp_master_data.client_status_prospect"/>
+            <field name="street">4 avenue Adolphe Max</field>
+            <field name="zip">69005</field>
+            <field name="city">Lyon</field>
+            <field name="country_id" ref="base.fr"/>
+            <field name="phone">+33 4 78 81 21 21</field>
+            <field name="email">contact@diocese-lyon-demo.fr</field>
+        </record>
+
+        <record id="demo_contact_diocese_lyon" model="res.partner">
+            <field name="name">Antoine Roche</field>
+            <field name="parent_id" ref="demo_org_diocese_lyon"/>
+            <field name="function">Responsable communication</field>
+            <field name="egp_department_id" ref="egp_master_data.contact_department_communication"/>
+            <field name="email">antoine.roche@diocese-lyon-demo.fr</field>
+            <field name="phone">+33 4 78 81 21 22</field>
+        </record>
+
+        <record id="demo_org_novatech" model="res.partner">
+            <field name="name">NovaTech Solutions</field>
+            <field name="is_company" eval="True"/>
+            <field name="egp_structure_type_id" ref="egp_master_data.structure_type_company"/>
+            <field name="industry_id" ref="egp_master_data.industry_egp_it"/>
+            <field name="egp_activity_id" ref="egp_master_data.activity_egp_startup"/>
+            <field name="egp_company_size_id" ref="egp_master_data.company_size_small"/>
+            <field name="egp_primary_relation_id" ref="egp_master_data.partner_relation_customer"/>
+            <field name="egp_client_status_id" ref="egp_master_data.client_status_active_customer"/>
+            <field name="street">22 rue de la Tech</field>
+            <field name="zip">75011</field>
+            <field name="city">Paris</field>
+            <field name="country_id" ref="base.fr"/>
+            <field name="phone">+33 1 55 30 40 50</field>
+            <field name="email">contact@novatech-solutions-demo.fr</field>
+        </record>
+
+        <record id="demo_contact_novatech" model="res.partner">
+            <field name="name">Claire Girard</field>
+            <field name="parent_id" ref="demo_org_novatech"/>
+            <field name="function">Office Manager</field>
+            <field name="egp_department_id" ref="egp_master_data.contact_department_administration"/>
+            <field name="email">claire.girard@novatech-solutions-demo.fr</field>
+            <field name="phone">+33 1 55 30 40 51</field>
+        </record>
+
+        <record id="demo_org_astoria_hotels" model="res.partner">
+            <field name="name">Groupe Hôtelier Astoria</field>
+            <field name="is_company" eval="True"/>
+            <field name="egp_structure_type_id" ref="egp_master_data.structure_type_company"/>
+            <field name="industry_id" ref="egp_master_data.industry_egp_tourism"/>
+            <field name="egp_activity_id" ref="egp_master_data.activity_egp_hotel_group"/>
+            <field name="egp_company_size_id" ref="egp_master_data.company_size_intermediate"/>
+            <field name="egp_primary_relation_id" ref="egp_master_data.partner_relation_customer"/>
+            <field name="egp_client_status_id" ref="egp_master_data.client_status_dormant_customer"/>
+            <field name="street">5 boulevard des Capucines</field>
+            <field name="zip">75002</field>
+            <field name="city">Paris</field>
+            <field name="country_id" ref="base.fr"/>
+            <field name="phone">+33 1 47 03 40 00</field>
+            <field name="email">contact@astoria-hotels-demo.fr</field>
+        </record>
+
+        <record id="demo_contact_astoria_hotels" model="res.partner">
+            <field name="name">Marc Lefèvre</field>
+            <field name="parent_id" ref="demo_org_astoria_hotels"/>
+            <field name="function">Directeur marketing</field>
+            <field name="egp_department_id" ref="egp_master_data.contact_department_marketing"/>
+            <field name="email">marc.lefevre@astoria-hotels-demo.fr</field>
+            <field name="phone">+33 1 47 03 40 01</field>
+        </record>
+
+    </data>
+</odoo>

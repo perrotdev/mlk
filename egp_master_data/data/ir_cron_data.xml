@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="ir_cron_egp_regular_customers" model="ir.cron">
+            <field name="name">EGP : recalcul des clients réguliers</field>
+            <field name="model_id" ref="base.model_res_partner"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_egp_update_regular_customers()</field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+        </record>
+
+        <record id="ir_cron_egp_dormant_customers" model="ir.cron">
+            <field name="name">EGP : passage des clients dormants</field>
+            <field name="model_id" ref="base.model_res_partner"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_egp_update_dormant_customers()</field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">1</field>
+            <field name="interval_type">weeks</field>
+        </record>
+
+    </data>
+</odoo>

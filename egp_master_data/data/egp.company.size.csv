@@ -1,0 +1,7 @@
+id,code,name,sequence
+company_size_micro,MICRO,1 à 9 salariés,10
+company_size_small,SMALL,10 à 49 salariés,20
+company_size_medium,MEDIUM,50 à 249 salariés,30
+company_size_intermediate,INTERMEDIATE,250 à 4999 salariés,40
+company_size_large,LARGE,5000 salariés et plus,50
+company_size_unknown,UNKNOWN,Non renseignée,900
