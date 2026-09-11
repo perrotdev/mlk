@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- EGP-VIEW-CON-001 / EGP-VIEW-CON-002 : formulaire Organisation et Contact -->
+    <record id="view_partner_form_egp" model="ir.ui.view">
+        <field name="name">res.partner.form.egp</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='phone']" position="after">
+                <div class="d-flex align-items-baseline w-md-50">
+                    <i class="fa fa-fw me-1 fa-mobile text-primary" title="Mobile"/>
+                    <field name="egp_mobile" class="w-100" widget="phone" placeholder="Mobile"/>
+                </div>
+            </xpath>
+
+            <xpath expr="//field[@name='vat']" position="before">
+                <field name="egp_trade_name" invisible="not is_company" placeholder="Nom commercial"/>
+            </xpath>
+
+            <xpath expr="//field[@name='category_id']" position="after">
+                <field name="egp_department_id" invisible="is_company"
+                       options="{'no_create': True, 'no_create_edit': True}"/>
+                <field name="egp_preferred_channel_id" invisible="is_company"
+                       options="{'no_create': True, 'no_create_edit': True}"/>
+                <field name="egp_contact_role_ids" widget="many2many_tags" invisible="is_company"
+                       options="{'color_field': 'color', 'no_create_edit': True}"/>
+            </xpath>
+
+            <xpath expr="//page[@name='sales_purchases']" position="before">
+                <page name="egp_classification" string="Classification EGP">
+                    <group>
+                        <group name="egp_structure" string="Structure" invisible="not is_company">
+                            <field name="egp_structure_type_id"
+                                   options="{'no_create': True, 'no_create_edit': True}"/>
+                            <field name="industry_id" options="{'no_create': True, 'no_create_edit': True}"/>
+                            <field name="egp_activity_id"
+                                   domain="[('industry_id', '=', industry_id)]"
+                                   options="{'no_create': True, 'no_create_edit': True}"/>
+                            <field name="egp_company_size_id"
+                                   options="{'no_create': True, 'no_create_edit': True}"/>
+                            <field name="egp_region_id" options="{'no_create': True, 'no_create_edit': True}"/>
+                        </group>
+                        <group name="egp_relation" string="Relation avec EGP" invisible="not is_company">
+                            <field name="egp_primary_relation_id"
+                                   options="{'no_create': True, 'no_create_edit': True}"/>
+                            <field name="egp_relation_ids" widget="many2many_tags"
+                                   options="{'no_create': True, 'no_create_edit': True}"/>
+                            <field name="egp_client_status_id"
+                                   options="{'no_create': True, 'no_create_edit': True}"/>
+                            <field name="egp_is_grand_account"/>
+                            <field name="egp_is_regular_customer"/>
+                            <field name="egp_has_active_framework"/>
+                            <field name="egp_main_contact_id"
+                                   domain="[('parent_id', '=', id), ('is_company', '=', False)]"
+                                   options="{'no_quick_create': True}"/>
+                        </group>
+                        <group name="egp_person" string="Informations contact" invisible="is_company">
+                            <field name="egp_department_id" readonly="1"/>
+                            <field name="egp_preferred_channel_id" readonly="1"/>
+                            <field name="egp_departure_date"/>
+                        </group>
+                        <group name="egp_quality" string="Qualité de la fiche">
+                            <field name="egp_completeness_rate" readonly="1"/>
+                            <field name="egp_is_incomplete" readonly="1"/>
+                            <field name="egp_missing_data" readonly="1" invisible="not egp_is_incomplete"/>
+                            <field name="egp_archive_reason"
+                                   groups="egp_master_data.group_egp_reference_admin"/>
+                        </group>
+                    </group>
+                    <div class="mt-3">
+                        <button name="action_egp_create_reactivation_lead" type="object" class="btn btn-secondary"
+                                string="Créer une piste de réactivation" icon="fa-refresh"
+                                invisible="not id"/>
+                    </div>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+
+    <!-- EGP-VIEW-CON-003 / EGP-VIEW-CON-004 : listes -->
+    <record id="view_partner_tree_egp" model="ir.ui.view">
+        <field name="name">res.partner.list.egp</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_tree"/>
+        <field name="arch" type="xml">
+            <field name="user_id" position="after">
+                <field name="egp_trade_name" optional="hide"/>
+                <field name="egp_structure_type_id" optional="hide"/>
+                <field name="industry_id" optional="hide"/>
+                <field name="egp_activity_id" optional="hide"/>
+                <field name="egp_primary_relation_id" optional="hide"/>
+                <field name="egp_client_status_id" optional="show"/>
+                <field name="egp_main_contact_id" optional="hide"/>
+                <field name="egp_completeness_rate" optional="hide"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- EGP-VIEW-CON-005 : recherche et filtres qualité -->
+    <record id="view_res_partner_filter_egp" model="ir.ui.view">
+        <field name="name">res.partner.search.egp</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_res_partner_filter"/>
+        <field name="arch" type="xml">
+            <field name="user_id" position="after">
+                <field name="egp_trade_name"/>
+                <field name="company_registry"/>
+                <field name="egp_structure_type_id"/>
+                <field name="egp_activity_id"/>
+                <field name="egp_primary_relation_id"/>
+                <field name="egp_client_status_id"/>
+            </field>
+            <filter name="type_company" position="after">
+                <separator/>
+                <filter name="egp_prospects" string="Prospects"
+                        domain="[('egp_client_status_id.code', '=', 'PROSPECT')]"/>
+                <filter name="egp_active_customers" string="Clients actifs"
+                        domain="[('egp_client_status_id.code', '=', 'ACTIVE_CUSTOMER')]"/>
+                <filter name="egp_dormant_customers" string="Clients dormants"
+                        domain="[('egp_client_status_id.code', '=', 'DORMANT_CUSTOMER')]"/>
+                <filter name="egp_grand_accounts" string="Grands comptes"
+                        domain="[('egp_is_grand_account', '=', True)]"/>
+                <separator/>
+                <filter name="egp_no_main_contact" string="Sans contact principal"
+                        domain="[('is_company', '=', True), ('egp_main_contact_id', '=', False)]"/>
+                <filter name="egp_no_owner" string="Sans propriétaire"
+                        domain="[('is_company', '=', True), ('user_id', '=', False)]"/>
+                <filter name="egp_no_industry" string="Sans secteur ou activité"
+                        domain="['|', ('industry_id', '=', False), ('egp_activity_id', '=', False)]"/>
+                <filter name="egp_incomplete" string="Fiches incomplètes"
+                        domain="['|', '|', '|', '|', ('egp_structure_type_id', '=', False), ('industry_id', '=', False), ('egp_primary_relation_id', '=', False), ('user_id', '=', False), ('egp_main_contact_id', '=', False)]"/>
+            </filter>
+            <xpath expr="//group[@name='group_by']" position="inside">
+                <filter name="egp_group_by_structure_type" string="Type de structure"
+                        context="{'group_by': 'egp_structure_type_id'}"/>
+                <filter name="egp_group_by_industry" string="Secteur"
+                        context="{'group_by': 'industry_id'}"/>
+                <filter name="egp_group_by_relation" string="Relation avec EGP"
+                        context="{'group_by': 'egp_primary_relation_id'}"/>
+                <filter name="egp_group_by_client_status" string="Statut client"
+                        context="{'group_by': 'egp_client_status_id'}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_egp_partner_quality" model="ir.actions.act_window">
+        <field name="name">Qualité des données Contacts</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="domain">[('is_company', '=', True)]</field>
+        <field name="context">{'search_default_egp_incomplete': 1}</field>
+    </record>
+
+</odoo>

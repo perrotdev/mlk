@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="crm_lost_reason_egp_no_need" model="crm.lost.reason">
+            <field name="name">Pas de besoin identifié</field>
+        </record>
+        <record id="crm_lost_reason_egp_no_budget" model="crm.lost.reason">
+            <field name="name">Budget insuffisant</field>
+        </record>
+        <record id="crm_lost_reason_egp_no_availability" model="crm.lost.reason">
+            <field name="name">Espace indisponible aux dates souhaitées</field>
+        </record>
+        <record id="crm_lost_reason_egp_competitor" model="crm.lost.reason">
+            <field name="name">Concurrent retenu</field>
+        </record>
+        <record id="crm_lost_reason_egp_postponed" model="crm.lost.reason">
+            <field name="name">Projet reporté ou annulé par le client</field>
+        </record>
+        <record id="crm_lost_reason_egp_no_answer" model="crm.lost.reason">
+            <field name="name">Absence de réponse du client</field>
+        </record>
+        <record id="crm_lost_reason_egp_out_of_scope" model="crm.lost.reason">
+            <field name="name">Besoin hors périmètre EGP</field>
+        </record>
+
+    </data>
+</odoo>

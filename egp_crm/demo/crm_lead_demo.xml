@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- ============================================================
+             PISTES — pipeline Prospection sortante (équipe egp_crm.crm_team_egp_outbound)
+             ============================================================ -->
+
+        <record id="demo_lead_seminaire_alliance" model="crm.lead">
+            <field name="name">Séminaire annuel Alliance Capital</field>
+            <field name="type">lead</field>
+            <field name="team_id" ref="crm_team_egp_outbound"/>
+            <field name="stage_id" ref="crm_stage_egp_lead_new"/>
+            <field name="user_id" ref="base.user_admin"/>
+            <field name="egp_prospector_id" ref="base.user_admin"/>
+            <field name="egp_creation_mode">outbound</field>
+            <field name="source_id" ref="egp_master_data.utm_source_egp_research"/>
+            <field name="partner_id" ref="egp_master_data.demo_contact_alliance_capital"/>
+            <field name="email_from">camille.dupont@alliance-capital-demo.fr</field>
+            <field name="phone">+33 1 42 96 10 21</field>
+            <field name="egp_event_type_id" ref="egp_master_data.event_type_seminar"/>
+            <field name="egp_market_segment_id" ref="egp_master_data.market_segment_corporate"/>
+        </record>
+
+        <record id="demo_lead_gala_petanque" model="crm.lead">
+            <field name="name">Soirée de gala Fédération Pétanque</field>
+            <field name="type">lead</field>
+            <field name="team_id" ref="crm_team_egp_outbound"/>
+            <field name="stage_id" ref="crm_stage_egp_lead_new"/>
+            <field name="user_id" ref="base.user_admin"/>
+            <field name="egp_prospector_id" ref="base.user_admin"/>
+            <field name="egp_creation_mode">outbound</field>
+            <field name="source_id" ref="egp_master_data.utm_source_egp_reactivation"/>
+            <field name="partner_id" ref="egp_master_data.demo_contact_petanque_federation"/>
+            <field name="email_from">julien.martin@petanque-federation-demo.fr</field>
+            <field name="phone">+33 4 78 60 10 11</field>
+            <field name="egp_event_type_id" ref="egp_master_data.event_type_gala"/>
+            <field name="egp_market_segment_id" ref="egp_master_data.market_segment_culture_entertainment"/>
+        </record>
+
+        <record id="demo_lead_journee_etude_vernon" model="crm.lead">
+            <field name="name">Journée d'étude Mairie de Vernon</field>
+            <field name="type">lead</field>
+            <field name="team_id" ref="crm_team_egp_outbound"/>
+            <field name="stage_id" ref="crm_stage_egp_lead_qualifying"/>
+            <field name="user_id" ref="base.user_admin"/>
+            <field name="egp_prospector_id" ref="base.user_admin"/>
+            <field name="egp_creation_mode">outbound</field>
+            <field name="source_id" ref="egp_master_data.utm_source_egp_research"/>
+            <field name="partner_id" ref="egp_master_data.demo_contact_mairie_vernon"/>
+            <field name="email_from">sophie.bernard@mairie-vernon-demo.fr</field>
+            <field name="phone">+33 2 32 64 30 01</field>
+            <field name="egp_event_type_id" ref="egp_master_data.event_type_study_day"/>
+            <field name="egp_market_segment_id" ref="egp_master_data.market_segment_institutional"/>
+            <field name="egp_participant_count">80</field>
+            <field name="egp_event_period_note">Second trimestre, hors vacances scolaires</field>
+            <field name="egp_need_description"><![CDATA[<p>Journée d'étude des services municipaux, avec restitution en plénière.</p>]]></field>
+        </record>
+
+        <record id="demo_lead_assemblee_novatech" model="crm.lead">
+            <field name="name">Assemblée générale NovaTech</field>
+            <field name="type">lead</field>
+            <field name="team_id" ref="crm_team_egp_outbound"/>
+            <field name="stage_id" ref="crm_stage_egp_lead_qualifying"/>
+            <field name="user_id" ref="base.user_admin"/>
+            <field name="egp_prospector_id" ref="base.user_admin"/>
+            <field name="egp_creation_mode">outbound</field>
+            <field name="source_id" ref="egp_master_data.utm_source_egp_adn_data"/>
+            <field name="partner_id" ref="egp_master_data.demo_contact_novatech"/>
+            <field name="email_from">claire.girard@novatech-solutions-demo.fr</field>
+            <field name="phone">+33 1 55 30 40 51</field>
+            <field name="egp_event_type_id" ref="egp_master_data.event_type_general_assembly"/>
+            <field name="egp_market_segment_id" ref="egp_master_data.market_segment_corporate"/>
+            <field name="egp_participant_count">50</field>
+            <field name="egp_need_description"><![CDATA[<p>Assemblée générale annuelle des actionnaires.</p>]]></field>
+            <field name="egp_temperature_id" ref="egp_master_data.lead_temperature_cold"/>
+        </record>
+
+        <record id="demo_lead_colloque_diocese" model="crm.lead">
+            <field name="name">Colloque diocésain de Lyon</field>
+            <field name="type">lead</field>
+            <field name="team_id" ref="crm_team_egp_outbound"/>
+            <field name="stage_id" ref="crm_stage_egp_lead_follow_up"/>
+            <field name="user_id" ref="base.user_admin"/>
+            <field name="egp_prospector_id" ref="base.user_admin"/>
+            <field name="egp_creation_mode">outbound</field>
+            <field name="source_id" ref="egp_master_data.utm_source_egp_research"/>
+            <field name="partner_id" ref="egp_master_data.demo_contact_diocese_lyon"/>
+            <field name="email_from">antoine.roche@diocese-lyon-demo.fr</field>
+            <field name="phone">+33 4 78 81 21 22</field>
+            <field name="egp_event_type_id" ref="egp_master_data.event_type_congress"/>
+            <field name="egp_market_segment_id" ref="egp_master_data.market_segment_worship"/>
+            <field name="egp_participant_count">200</field>
+            <field name="egp_event_period_note">Automne, sur deux jours</field>
+            <field name="egp_need_description"><![CDATA[<p>Colloque diocésain avec ateliers et messe de clôture.</p>]]></field>
+            <field name="egp_follow_up_date" eval="(DateTime.today() + relativedelta(days=7)).strftime('%Y-%m-%d')"/>
+        </record>
+
+        <record id="demo_lead_soiree_astoria" model="crm.lead">
+            <field name="name">Soirée des lauréats Astoria</field>
+            <field name="type">lead</field>
+            <field name="team_id" ref="crm_team_egp_outbound"/>
+            <field name="stage_id" ref="crm_stage_egp_lead_follow_up"/>
+            <field name="user_id" ref="base.user_admin"/>
+            <field name="egp_prospector_id" ref="base.user_admin"/>
+            <field name="egp_creation_mode">outbound</field>
+            <field name="source_id" ref="egp_master_data.utm_source_egp_reactivation"/>
+            <field name="partner_id" ref="egp_master_data.demo_contact_astoria_hotels"/>
+            <field name="email_from">marc.lefevre@astoria-hotels-demo.fr</field>
+            <field name="phone">+33 1 47 03 40 01</field>
+            <field name="egp_event_type_id" ref="egp_master_data.event_type_awards"/>
+            <field name="egp_market_segment_id" ref="egp_master_data.market_segment_private"/>
+            <field name="egp_participant_count">150</field>
+            <field name="egp_event_start" eval="(DateTime.today() + relativedelta(months=2)).strftime('%Y-%m-%d 18:00:00')"/>
+            <field name="egp_event_end" eval="(DateTime.today() + relativedelta(months=2)).strftime('%Y-%m-%d 23:00:00')"/>
+            <field name="egp_need_description"><![CDATA[<p>Cérémonie annuelle de remise de prix aux franchisés du groupe.</p>]]></field>
+            <field name="egp_temperature_id" ref="egp_master_data.lead_temperature_hot"/>
+            <field name="egp_follow_up_date" eval="(DateTime.today() + relativedelta(days=3)).strftime('%Y-%m-%d')"/>
+        </record>
+
+        <record id="demo_lead_congres_petanque" model="crm.lead">
+            <field name="name">Congrès national Fédération Pétanque</field>
+            <field name="type">lead</field>
+            <field name="team_id" ref="crm_team_egp_outbound"/>
+            <field name="stage_id" ref="crm_stage_egp_lead_qualified"/>
+            <field name="user_id" ref="base.user_admin"/>
+            <field name="egp_prospector_id" ref="base.user_admin"/>
+            <field name="egp_creation_mode">outbound</field>
+            <field name="source_id" ref="egp_master_data.utm_source_egp_research"/>
+            <field name="partner_id" ref="egp_master_data.demo_contact_petanque_federation"/>
+            <field name="email_from">julien.martin@petanque-federation-demo.fr</field>
+            <field name="phone">+33 4 78 60 10 11</field>
+            <field name="egp_event_type_id" ref="egp_master_data.event_type_congress"/>
+            <field name="egp_market_segment_id" ref="egp_master_data.market_segment_culture_entertainment"/>
+            <field name="egp_participant_count">300</field>
+            <field name="egp_event_start" eval="(DateTime.today() + relativedelta(months=4)).strftime('%Y-%m-%d 09:00:00')"/>
+            <field name="egp_event_end" eval="(DateTime.today() + relativedelta(months=4, days=2)).strftime('%Y-%m-%d 18:00:00')"/>
+            <field name="egp_need_description"><![CDATA[<p>Congrès national avec assemblée générale et remise des trophées.</p>]]></field>
+            <field name="egp_temperature_id" ref="egp_master_data.lead_temperature_warm"/>
+            <field name="egp_qualified_date" eval="DateTime.today().strftime('%Y-%m-%d')"/>
+        </record>
+
+        <record id="demo_lead_convention_alliance" model="crm.lead">
+            <field name="name">Convention commerciale Alliance Capital</field>
+            <field name="type">lead</field>
+            <field name="team_id" ref="crm_team_egp_outbound"/>
+            <field name="stage_id" ref="crm_stage_egp_lead_qualified"/>
+            <field name="user_id" ref="base.user_admin"/>
+            <field name="egp_prospector_id" ref="base.user_admin"/>
+            <field name="egp_creation_mode">outbound</field>
+            <field name="source_id" ref="egp_master_data.utm_source_egp_research"/>
+            <field name="partner_id" ref="egp_master_data.demo_contact_alliance_capital"/>
+            <field name="email_from">camille.dupont@alliance-capital-demo.fr</field>
+            <field name="phone">+33 1 42 96 10 21</field>
+            <field name="egp_event_type_id" ref="egp_master_data.event_type_convention"/>
+            <field name="egp_market_segment_id" ref="egp_master_data.market_segment_corporate"/>
+            <field name="egp_participant_count">400</field>
+            <field name="egp_event_start" eval="(DateTime.today() + relativedelta(months=3)).strftime('%Y-%m-%d 09:00:00')"/>
+            <field name="egp_event_end" eval="(DateTime.today() + relativedelta(months=3, days=1)).strftime('%Y-%m-%d 18:00:00')"/>
+            <field name="egp_need_description"><![CDATA[<p>Convention commerciale annuelle du réseau d'agences.</p>]]></field>
+            <field name="egp_temperature_id" ref="egp_master_data.lead_temperature_hot"/>
+            <field name="egp_qualified_date" eval="DateTime.today().strftime('%Y-%m-%d')"/>
+        </record>
+
+        <!-- ============================================================
+             OPPORTUNITÉS — pipeline Commercial EGP (équipe egp_crm.crm_team_egp_commercial)
+             ============================================================ -->
+
+        <record id="demo_opp_voeux_novatech" model="crm.lead">
+            <field name="name">Vœux annuels NovaTech</field>
+            <field name="type">opportunity</field>
+            <field name="team_id" ref="crm_team_egp_commercial"/>
+            <field name="stage_id" ref="crm_stage_egp_opp_new"/>
+            <field name="user_id" ref="base.user_admin"/>
+            <field name="partner_id" ref="egp_master_data.demo_contact_novatech"/>
+            <field name="email_from">claire.girard@novatech-solutions-demo.fr</field>
+            <field name="phone">+33 1 55 30 40 51</field>
+            <field name="egp_event_type_id" ref="egp_master_data.event_type_new_year_greetings"/>
+            <field name="egp_market_segment_id" ref="egp_master_data.market_segment_corporate"/>
+            <field name="egp_opportunity_type_id" ref="egp_master_data.opportunity_type_one_off_event"/>
+            <field name="egp_participant_count">60</field>
+            <field name="egp_event_start" eval="(DateTime.today() + relativedelta(months=1)).strftime('%Y-%m-%d 19:00:00')"/>
+            <field name="egp_event_end" eval="(DateTime.today() + relativedelta(months=1)).strftime('%Y-%m-%d 22:00:00')"/>
+            <field name="egp_configuration_id" ref="egp_master_data.event_configuration_cocktail"/>
+            <field name="egp_need_description"><![CDATA[<p>Vœux de début d'année aux collaborateurs et partenaires.</p>]]></field>
+            <field name="egp_temperature_id" ref="egp_master_data.lead_temperature_warm"/>
+            <field name="egp_maturity_id" ref="egp_master_data.maturity_level_defined"/>
+            <field name="expected_revenue">8000</field>
+        </record>
+
+        <record id="demo_opp_forum_diocese" model="crm.lead">
+            <field name="name">Forum Diocèse de Lyon</field>
+            <field name="type">opportunity</field>
+            <field name="team_id" ref="crm_team_egp_commercial"/>
+            <field name="stage_id" ref="crm_stage_egp_opp_qualified"/>
+            <field name="user_id" ref="base.user_admin"/>
+            <field name="partner_id" ref="egp_master_data.demo_contact_diocese_lyon"/>
+            <field name="email_from">antoine.roche@diocese-lyon-demo.fr</field>
+            <field name="phone">+33 4 78 81 21 22</field>
+            <field name="egp_event_type_id" ref="egp_master_data.event_type_forum"/>
+            <field name="egp_market_segment_id" ref="egp_master_data.market_segment_worship"/>
+            <field name="egp_opportunity_type_id" ref="egp_master_data.opportunity_type_one_off_event"/>
+            <field name="egp_participant_count">250</field>
+            <field name="egp_event_start" eval="(DateTime.today() + relativedelta(months=2)).strftime('%Y-%m-%d 09:00:00')"/>
+            <field name="egp_event_end" eval="(DateTime.today() + relativedelta(months=2)).strftime('%Y-%m-%d 18:00:00')"/>
+            <field name="egp_configuration_id" ref="egp_master_data.event_configuration_theater"/>
+            <field name="egp_need_description"><![CDATA[<p>Forum diocésain ouvert aux paroisses du diocèse.</p>]]></field>
+            <field name="egp_temperature_id" ref="egp_master_data.lead_temperature_warm"/>
+            <field name="egp_maturity_id" ref="egp_master_data.maturity_level_budgeted"/>
+            <field name="expected_revenue">15000</field>
+        </record>
+
+        <record id="demo_opp_salon_alliance" model="crm.lead">
+            <field name="name">Salon professionnel Alliance Capital</field>
+            <field name="type">opportunity</field>
+            <field name="team_id" ref="crm_team_egp_commercial"/>
+            <field name="stage_id" ref="crm_stage_egp_opp_proposal"/>
+            <field name="user_id" ref="base.user_admin"/>
+            <field name="partner_id" ref="egp_master_data.demo_contact_alliance_capital"/>
+            <field name="email_from">camille.dupont@alliance-capital-demo.fr</field>
+            <field name="phone">+33 1 42 96 10 21</field>
+            <field name="egp_event_type_id" ref="egp_master_data.event_type_trade_show"/>
+            <field name="egp_market_segment_id" ref="egp_master_data.market_segment_corporate"/>
+            <field name="egp_opportunity_type_id" ref="egp_master_data.opportunity_type_one_off_event"/>
+            <field name="egp_participant_count">500</field>
+            <field name="egp_event_start" eval="(DateTime.today() + relativedelta(months=2, days=15)).strftime('%Y-%m-%d 09:00:00')"/>
+            <field name="egp_event_end" eval="(DateTime.today() + relativedelta(months=2, days=17)).strftime('%Y-%m-%d 18:00:00')"/>
+            <field name="egp_configuration_id" ref="egp_master_data.event_configuration_standing"/>
+            <field name="egp_need_description"><![CDATA[<p>Salon professionnel des services financiers, stands et conférences.</p>]]></field>
+            <field name="egp_temperature_id" ref="egp_master_data.lead_temperature_hot"/>
+            <field name="egp_maturity_id" ref="egp_master_data.maturity_level_budgeted"/>
+            <field name="expected_revenue">45000</field>
+        </record>
+
+        <record id="demo_opp_cocktail_astoria" model="crm.lead">
+            <field name="name">Cocktail partenaires Astoria</field>
+            <field name="type">opportunity</field>
+            <field name="team_id" ref="crm_team_egp_commercial"/>
+            <field name="stage_id" ref="crm_stage_egp_opp_negotiation"/>
+            <field name="user_id" ref="base.user_admin"/>
+            <field name="partner_id" ref="egp_master_data.demo_contact_astoria_hotels"/>
+            <field name="email_from">marc.lefevre@astoria-hotels-demo.fr</field>
+            <field name="phone">+33 1 47 03 40 01</field>
+            <field name="egp_event_type_id" ref="egp_master_data.event_type_cocktail"/>
+            <field name="egp_market_segment_id" ref="egp_master_data.market_segment_private"/>
+            <field name="egp_opportunity_type_id" ref="egp_master_data.opportunity_type_one_off_event"/>
+            <field name="egp_participant_count">120</field>
+            <field name="egp_event_start" eval="(DateTime.today() + relativedelta(months=1, days=10)).strftime('%Y-%m-%d 19:00:00')"/>
+            <field name="egp_event_end" eval="(DateTime.today() + relativedelta(months=1, days=10)).strftime('%Y-%m-%d 23:00:00')"/>
+            <field name="egp_configuration_id" ref="egp_master_data.event_configuration_cocktail"/>
+            <field name="egp_need_description"><![CDATA[<p>Cocktail de fin d'année pour les partenaires hôteliers.</p>]]></field>
+            <field name="egp_temperature_id" ref="egp_master_data.lead_temperature_hot"/>
+            <field name="egp_maturity_id" ref="egp_master_data.maturity_level_decision"/>
+            <field name="expected_revenue">20000</field>
+        </record>
+
+        <record id="demo_opp_gala_petanque" model="crm.lead">
+            <field name="name">Gala annuel Fédération Pétanque</field>
+            <field name="type">opportunity</field>
+            <field name="team_id" ref="crm_team_egp_commercial"/>
+            <field name="stage_id" ref="crm_stage_egp_opp_won"/>
+            <field name="user_id" ref="base.user_admin"/>
+            <field name="partner_id" ref="egp_master_data.demo_contact_petanque_federation"/>
+            <field name="email_from">julien.martin@petanque-federation-demo.fr</field>
+            <field name="phone">+33 4 78 60 10 11</field>
+            <field name="egp_event_type_id" ref="egp_master_data.event_type_gala"/>
+            <field name="egp_market_segment_id" ref="egp_master_data.market_segment_culture_entertainment"/>
+            <field name="egp_opportunity_type_id" ref="egp_master_data.opportunity_type_one_off_event"/>
+            <field name="egp_participant_count">350</field>
+            <field name="egp_event_start" eval="(DateTime.today() + relativedelta(days=45)).strftime('%Y-%m-%d 19:00:00')"/>
+            <field name="egp_event_end" eval="(DateTime.today() + relativedelta(days=45)).strftime('%Y-%m-%d 23:59:00')"/>
+            <field name="egp_configuration_id" ref="egp_master_data.event_configuration_banquet"/>
+            <field name="egp_need_description"><![CDATA[<p>Gala annuel de remise des trophées régionaux.</p>]]></field>
+            <field name="egp_temperature_id" ref="egp_master_data.lead_temperature_hot"/>
+            <field name="egp_maturity_id" ref="egp_master_data.maturity_level_decision"/>
+            <field name="expected_revenue">30000</field>
+        </record>
+
+        <record id="demo_opp_congres_vernon" model="crm.lead">
+            <field name="name">Congrès des maires Vernon</field>
+            <field name="type">opportunity</field>
+            <field name="team_id" ref="crm_team_egp_commercial"/>
+            <field name="stage_id" ref="crm_stage_egp_opp_deposit_paid"/>
+            <field name="user_id" ref="base.user_admin"/>
+            <field name="partner_id" ref="egp_master_data.demo_contact_mairie_vernon"/>
+            <field name="email_from">sophie.bernard@mairie-vernon-demo.fr</field>
+            <field name="phone">+33 2 32 64 30 01</field>
+            <field name="egp_event_type_id" ref="egp_master_data.event_type_congress"/>
+            <field name="egp_market_segment_id" ref="egp_master_data.market_segment_institutional"/>
+            <field name="egp_opportunity_type_id" ref="egp_master_data.opportunity_type_one_off_event"/>
+            <field name="egp_participant_count">600</field>
+            <field name="egp_event_start" eval="(DateTime.today() + relativedelta(days=60)).strftime('%Y-%m-%d 09:00:00')"/>
+            <field name="egp_event_end" eval="(DateTime.today() + relativedelta(days=62)).strftime('%Y-%m-%d 18:00:00')"/>
+            <field name="egp_configuration_id" ref="egp_master_data.event_configuration_theater"/>
+            <field name="egp_need_description"><![CDATA[<p>Congrès annuel de l'association des maires du département.</p>]]></field>
+            <field name="egp_temperature_id" ref="egp_master_data.lead_temperature_hot"/>
+            <field name="egp_maturity_id" ref="egp_master_data.maturity_level_decision"/>
+            <field name="expected_revenue">60000</field>
+        </record>
+
+        <record id="demo_opp_seminaire_novatech_done" model="crm.lead">
+            <field name="name">Séminaire stratégique NovaTech</field>
+            <field name="type">opportunity</field>
+            <field name="team_id" ref="crm_team_egp_commercial"/>
+            <field name="stage_id" ref="crm_stage_egp_opp_event_done"/>
+            <field name="user_id" ref="base.user_admin"/>
+            <field name="partner_id" ref="egp_master_data.demo_contact_novatech"/>
+            <field name="email_from">claire.girard@novatech-solutions-demo.fr</field>
+            <field name="phone">+33 1 55 30 40 51</field>
+            <field name="egp_event_type_id" ref="egp_master_data.event_type_seminar"/>
+            <field name="egp_market_segment_id" ref="egp_master_data.market_segment_corporate"/>
+            <field name="egp_opportunity_type_id" ref="egp_master_data.opportunity_type_one_off_event"/>
+            <field name="egp_participant_count">40</field>
+            <field name="egp_event_start" eval="(DateTime.today() - relativedelta(days=20)).strftime('%Y-%m-%d 09:00:00')"/>
+            <field name="egp_event_end" eval="(DateTime.today() - relativedelta(days=18)).strftime('%Y-%m-%d 18:00:00')"/>
+            <field name="egp_configuration_id" ref="egp_master_data.event_configuration_u_shape"/>
+            <field name="egp_need_description"><![CDATA[<p>Séminaire de direction sur deux jours, hors les murs.</p>]]></field>
+            <field name="egp_temperature_id" ref="egp_master_data.lead_temperature_hot"/>
+            <field name="egp_maturity_id" ref="egp_master_data.maturity_level_decision"/>
+            <field name="expected_revenue">12000</field>
+        </record>
+
+        <record id="demo_opp_convention_alliance_closed" model="crm.lead">
+            <field name="name">Convention réseau Alliance Capital</field>
+            <field name="type">opportunity</field>
+            <field name="team_id" ref="crm_team_egp_commercial"/>
+            <field name="stage_id" ref="crm_stage_egp_opp_closed"/>
+            <field name="user_id" ref="base.user_admin"/>
+            <field name="partner_id" ref="egp_master_data.demo_contact_alliance_capital"/>
+            <field name="email_from">camille.dupont@alliance-capital-demo.fr</field>
+            <field name="phone">+33 1 42 96 10 21</field>
+            <field name="egp_event_type_id" ref="egp_master_data.event_type_convention"/>
+            <field name="egp_market_segment_id" ref="egp_master_data.market_segment_corporate"/>
+            <field name="egp_opportunity_type_id" ref="egp_master_data.opportunity_type_one_off_event"/>
+            <field name="egp_participant_count">300</field>
+            <field name="egp_event_start" eval="(DateTime.today() - relativedelta(days=90)).strftime('%Y-%m-%d 09:00:00')"/>
+            <field name="egp_event_end" eval="(DateTime.today() - relativedelta(days=88)).strftime('%Y-%m-%d 18:00:00')"/>
+            <field name="egp_configuration_id" ref="egp_master_data.event_configuration_theater"/>
+            <field name="egp_need_description"><![CDATA[<p>Convention commerciale du réseau, dossier clôturé.</p>]]></field>
+            <field name="egp_temperature_id" ref="egp_master_data.lead_temperature_warm"/>
+            <field name="egp_maturity_id" ref="egp_master_data.maturity_level_decision"/>
+            <field name="egp_admin_complete" eval="True"/>
+            <field name="expected_revenue">25000</field>
+        </record>
+
+    </data>
+</odoo>

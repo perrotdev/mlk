@@ -1,0 +1,6 @@
+id,code,name,sequence,description
+client_status_prospect,PROSPECT,Prospect,10,Aucun achat confirmé.
+client_status_active_customer,ACTIVE_CUSTOMER,Client actif,20,Au moins une commande confirmée et activité récente.
+client_status_dormant_customer,DORMANT_CUSTOMER,Client dormant,30,Délai sans événement ou commande dépassé.
+client_status_former_customer,FORMER_CUSTOMER,Ancien client,40,Relation terminée mais historique conservé.
+client_status_inactive,INACTIVE,Inactif,50,Organisation ne devant plus être sollicitée.

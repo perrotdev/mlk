@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_config_settings_view_form_egp" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.egp</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="crm.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//app[@name='crm']" position="inside">
+                <block title="Paramètres commerciaux EGP" name="egp_commercial_settings">
+                    <setting string="Délai du premier appel"
+                             help="Échéance de l'activité « Premier appel » créée à la création d'une piste (EGP-PAR-001).">
+                        <field name="egp_first_call_delay_days"/> jours
+                    </setting>
+                    <setting string="Inactivité d'une piste"
+                             help="Nombre de jours sans activité au-delà duquel une piste est signalée inactive (EGP-PAR-002).">
+                        <field name="egp_lead_inactivity_days"/> jours
+                    </setting>
+                    <setting string="Relance après envoi d'un devis"
+                             help="Délai de création de l'activité de relance après l'envoi d'un devis (EGP-PAR-003).">
+                        <field name="egp_quotation_follow_up_days"/> jours
+                    </setting>
+                    <setting string="Préavis avant fin d'option"
+                             help="Délai de rappel avant l'échéance d'une option sur un espace (EGP-PAR-004).">
+                        <field name="egp_option_notice_days"/> jours
+                    </setting>
+                    <setting string="Escalade après option expirée"
+                             help="Délai avant escalade à la Responsable commerciale (EGP-PAR-005).">
+                        <field name="egp_option_escalation_days"/> jours
+                    </setting>
+                    <setting string="Passage en client dormant"
+                             help="Durée sans événement gagné au-delà de laquelle un client devient dormant (EGP-PAR-006).">
+                        <field name="egp_dormant_customer_delay_months"/> mois
+                    </setting>
+                    <setting string="Client régulier"
+                             help="Nombre minimal d'événements gagnés sur la fenêtre glissante (EGP-PAR-011 et EGP-PAR-012).">
+                        <field name="egp_regular_customer_min_events"/> événements sur
+                        <field name="egp_regular_customer_window_months"/> mois
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

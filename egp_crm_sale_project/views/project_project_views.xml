@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="project_project_view_form_egp" model="ir.ui.view">
+        <field name="name">project.project.form.egp</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.edit_project"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page name="egp_event" string="Événement EGP" invisible="not egp_lead_id">
+                    <div class="mb-3">
+                        <button name="action_egp_update_from_crm" type="object"
+                                class="btn btn-secondary" string="Mettre à jour depuis le CRM"
+                                confirm="Les données de production reprises du CRM seront écrasées. Continuer ?"/>
+                    </div>
+                    <group>
+                        <group string="Origine">
+                            <field name="egp_lead_id" readonly="1"/>
+                            <field name="egp_sale_order_id" readonly="1"/>
+                            <field name="egp_end_customer_id" readonly="1"/>
+                            <field name="egp_secondary_contact_ids" widget="many2many_tags" readonly="1"/>
+                        </group>
+                        <group string="Événement">
+                            <field name="egp_event_type_id" readonly="1"/>
+                            <field name="egp_market_segment_id" readonly="1"/>
+                            <field name="egp_participant_count"/>
+                            <field name="egp_configuration_id"/>
+                        </group>
+                        <group string="Planning">
+                            <field name="egp_event_start"/>
+                            <field name="egp_event_end"/>
+                            <field name="egp_setup_required"/>
+                            <field name="egp_setup_start" invisible="not egp_setup_required"/>
+                            <field name="egp_teardown_required"/>
+                            <field name="egp_teardown_end" invisible="not egp_teardown_required"/>
+                        </group>
+                        <group string="Prestations vendues">
+                            <field name="egp_catering_required"/>
+                            <field name="egp_av_required"/>
+                            <field name="egp_furniture_required"/>
+                            <field name="egp_animation_required"/>
+                            <field name="egp_security_required"/>
+                            <field name="egp_reception_required"/>
+                            <field name="egp_parking_required"/>
+                        </group>
+                    </group>
+                    <group string="Contraintes">
+                        <field name="egp_constraints" nolabel="1" colspan="2"
+                               placeholder="Contraintes techniques, logistiques ou horaires..."/>
+                    </group>
+                    <group string="Objectifs du client">
+                        <field name="egp_client_objectives" nolabel="1" colspan="2"
+                               placeholder="Objectifs poursuivis par le client pour cet événement..."/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

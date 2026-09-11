@@ -1,0 +1,12 @@
+id,code,name,sequence
+partner_relation_customer,CUSTOMER,Client,10
+partner_relation_prospect,PROSPECT,Prospect,20
+partner_relation_partner,PARTNER,Partenaire,30
+partner_relation_business_introducer,BUSINESS_INTRODUCER,Apporteur d'affaire,40
+partner_relation_supplier,SUPPLIER,Fournisseur,50
+partner_relation_service_provider,SERVICE_PROVIDER,Prestataire,60
+partner_relation_institution,INSTITUTION,Institution,70
+partner_relation_press_media,PRESS_MEDIA,Presse / Média,80
+partner_relation_embassy,EMBASSY,Ambassade,90
+partner_relation_network,NETWORK,Réseau,100
+partner_relation_other,OTHER,Autre,900

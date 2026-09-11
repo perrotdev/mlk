@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_groups_privilege_egp" model="res.groups.privilege">
+        <field name="name">EGP</field>
+        <field name="sequence">40</field>
+        <field name="category_id" ref="base.module_category_sales"/>
+    </record>
+
+    <!-- EGP-SEC : Administrateur des référentiels métier (§11.2) -->
+    <record id="group_egp_reference_admin" model="res.groups">
+        <field name="name">EGP / Administrateur des référentiels</field>
+        <field name="sequence">10</field>
+        <field name="privilege_id" ref="res_groups_privilege_egp"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="comment">Gère les listes métier EGP sans accéder aux paramètres techniques Odoo.</field>
+    </record>
+
+    <record id="base.group_system" model="res.groups">
+        <field name="implied_ids" eval="[(4, ref('egp_master_data.group_egp_reference_admin'))]"/>
+    </record>
+
+</odoo>

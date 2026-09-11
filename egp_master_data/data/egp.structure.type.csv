@@ -1,0 +1,16 @@
+id,code,name,sequence
+structure_type_company,COMPANY,Entreprise,10
+structure_type_association,ASSOCIATION,Association,20
+structure_type_local_authority,LOCAL_AUTHORITY,Collectivité territoriale,30
+structure_type_state_admin,STATE_ADMIN,Administration / État,40
+structure_type_public_body,PUBLIC_BODY,Établissement public,50
+structure_type_foundation,FOUNDATION,Fondation,60
+structure_type_cooperative,COOPERATIVE,Coopérative,70
+structure_type_prof_union,PROF_UNION,Syndicat professionnel,80
+structure_type_international_org,INTERNATIONAL_ORG,Organisation internationale,90
+structure_type_federation,FEDERATION,Groupement / Fédération,100
+structure_type_gie,GIE,GIE — Groupement d'intérêt économique,110
+structure_type_liberal_profession,LIBERAL_PROFESSION,Profession libérale,120
+structure_type_sole_trader,SOLE_TRADER,Indépendant / Auto-entrepreneur,130
+structure_type_individual,INDIVIDUAL,Particulier,140
+structure_type_other,OTHER,Autre,900

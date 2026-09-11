@@ -1,0 +1,32 @@
+id,name,active
+industry_egp_events,Événementiel,True
+industry_egp_communication,Communication & Marketing,True
+industry_egp_production,Production & Divertissement,True
+industry_egp_culture,Culture,True
+industry_egp_worship,Cultuel,True
+industry_egp_education,Enseignement & Formation,True
+industry_egp_institutional,Institutionnel,True
+industry_egp_health,Santé,True
+industry_egp_manufacturing,Industrie,True
+industry_egp_retail,Commerce & Distribution,True
+industry_egp_banking,Banque & Assurance,True
+industry_egp_real_estate,Immobilier,True
+industry_egp_construction,BTP,True
+industry_egp_it,Informatique & Numérique,True
+industry_egp_telecom,Télécommunications,True
+industry_egp_transport,Transport & Logistique,True
+industry_egp_tourism,Hôtellerie & Tourisme,True
+industry_egp_catering,Restauration,True
+industry_egp_agrifood,Agriculture & Agroalimentaire,True
+industry_egp_sport,Sport,True
+industry_egp_media,Médias & Presse,True
+industry_egp_energy,Énergie,True
+industry_egp_environment,Environnement,True
+industry_egp_research,Recherche & Innovation,True
+industry_egp_defense,Défense & Sécurité,True
+industry_egp_justice,Justice,True
+industry_egp_social,Social & Médico-social,True
+industry_egp_humanitarian,Humanitaire,True
+industry_egp_finance,Finance & Investissement,True
+industry_egp_business_services,Services aux entreprises,True
+industry_egp_other,Autre,True

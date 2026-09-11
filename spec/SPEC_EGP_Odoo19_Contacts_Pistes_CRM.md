@@ -1,9 +1,9 @@
 ---
 title: "Spécification fonctionnelle et technique — Référentiel Contacts, Pistes et Opportunités"
 project: "Refonte ERP Odoo 19 — Espace Grand Paris (EGP)"
-version: "0.5"
-status: "Projet de spécification — retours client v0.4 intégrés, arbitrages restants ciblés"
-date: "2026-09-06"
+version: "0.7"
+status: "Projet de spécification — architecture Location/Planning des espaces arbitrée, arbitrages restants ciblés"
+date: "2026-09-10"
 source_system: "Odoo 16"
 target_system: "Odoo 19"
 ---
@@ -18,7 +18,7 @@ target_system: "Odoo 19"
 | Périmètre | Contacts, prospection sortante, CRM Opportunités, interfaces Ventes/Projet/Facturation |
 | Cible | Odoo 19, base multi-sociétés |
 | Origine | Mise à niveau en cours depuis Odoo 16 |
-| Statut | Révision 0.5 — retours client v0.4 : apporteur d'affaire, taxonomie des types d'événement, segment de marché, nombre d'événements annuels, validations de décisions |
+| Statut | Révision 0.7 — modèle technique des espaces arrêté sur le standard Location + Planning ; formulaire Piste : champ Contact unique remplaçant la saisie libre du nom de société |
 | Préfixe technique proposé | `egp_` |
 | Principe directeur | Standard Odoo 19 d'abord, extension par addons versionnés lorsque le standard ne suffit pas |
 
@@ -34,7 +34,9 @@ target_system: "Odoo 19"
 | 0.2 | 2026-08-09 | SIRET natif, nom natif, première hypothèse Rendez-vous, perte native, approbation Studio et réécriture de la mise à niveau Odoo 16 → 19 | Archivée comme base de travail |
 | 0.3 | 2026-08-09 | Décisions client intégrées : multi-sociétés, filiales, qualification, sécurité équipe, paramètres administrables, import ADN manuel, projet enrichi depuis le CRM et réouverture de l’architecture Location/espaces | Archivée comme base de travail |
 | 0.4 | 2026-08-09 | Étapes post-gain toutes `is_won` avec KPI ancrés sur `date_closed` ; exclusion des opportunités de type contrat cadre des prévisions et taux ; distinction explicite champs calculés événementiels vs champs mis à jour par cron ; clarification option/espaces en deux temps (intention commerciale sur le lead, engagement dans Location) ; reprise automatique des données de qualification dans le devis de location, indicateur de disponibilité en qualification et mise à jour des dates du devis via bandeau + bouton ; suppression de la colonne probabilité indicative ; nettoyage des dépendances d'addons ; complétude Contacts non stockée ; corrections de numérotation | Archivée comme base de travail |
-| 0.5 | 2026-09-06 | Retours client v0.4 : apporteur d'affaire et trois schémas d'intermédiation (§7.2.1, §8.5) ; taxonomie hiérarchique des types d'événement fournie (§8.10) ; segment de marché (§8.11) ; nombre d'événements annuels ; précision du nombre de personnes ; validation des décisions EGP-DEC-003/005/009/029 et arbitrage EGP-DEC-010A/021 | Révision courante |
+| 0.5 | 2026-09-06 | Retours client v0.4 : apporteur d'affaire et trois schémas d'intermédiation (§7.2.1, §8.5) ; taxonomie hiérarchique des types d'événement fournie (§8.10) ; segment de marché (§8.11) ; nombre d'événements annuels ; précision du nombre de personnes ; validation des décisions EGP-DEC-003/005/009/029 et arbitrage EGP-DEC-010A/021 | Archivée comme base de travail |
+| 0.6 | 2026-09-09 | Clôture d'`EGP-DEC-010A` : l'espace est un **produit de location de type Service** rattaché à un **Rôle Planning**, chaque salle physique étant un **Matériel** Planning, le pont natif `sale_renting_planning` assurant disponibilité, affectation et synchronisation des périodes ; abandon du modèle `egp.space` ; nouvelle décision `EGP-DEC-049` — la **capacité d'accueil** et la **configuration de salle** sont des caractéristiques de l'événement (`egp_participant_count`, `egp_configuration_id`) et non du référentiel des espaces ; réduction du périmètre restant d'`EGP-DEC-020` au seul comportement de l'option non confirmée ; mise à jour des §§1.4, 1.5, 2.3, 3.1, 3.2, 4.1, 6.3.2, 7.3, 7.3.1, 7.6, 8.2, 8.3, 9, 11.7, 12.4, 13.5, 15.5, 16, 17 et annexes | Archivée comme base de travail |
+| 0.7 | 2026-09-10 | `EGP-DEC-050` — le formulaire Piste remplace le champ texte natif `partner_name` par le champ relationnel `partner_id` (recherche/création de contact), afin d'éviter la création silencieuse d'une organisation incomplète par le mécanisme natif de conversion (`_create_customer`) puis son annulation par le contrôle de qualification EGP-RG-020 ; mise à jour d'EGP-FLD-LEAD-010 (§6.2) | Révision courante |
 
 ## Table des matières
 
@@ -126,11 +128,11 @@ Le besoin est présenté comme un « module custom ». Techniquement, il est rec
 |---|---|
 | `egp_master_data` | Extensions Contacts, référentiels partagés, gouvernance et qualité des données |
 | `egp_crm` | Extensions Pistes/Opportunités, qualification, pipelines, vues et sécurité CRM |
-| `egp_crm_rental` | Intégration conditionnelle entre le CRM et l'application Location pour les espaces, périodes, options et disponibilités ; activée après clôture de `EGP-DEC-010A` et `EGP-DEC-020` |
+| `egp_crm_rental` | Intégration entre le CRM et le couple **Location + Planning** pour les espaces, périodes, options et disponibilités ; architecture arrêtée par `EGP-DEC-010A`, périmètre de l'option non confirmée finalisé par `EGP-DEC-020` |
 | `egp_crm_sale_project` | Création orchestrée du projet et transfert contrôlé des informations CRM, interfaces Ventes/Documents et indicateurs financiers |
 | `egp_commercial` | Méta-addon dépendant des addons retenus, sans logique métier |
 
-Cette séparation évite d'imposer la dépendance Location tant que son modèle de données n'est pas confirmé, permet d'installer les référentiels sans forcer les dépendances Ventes/Projet et limite les impacts lors des évolutions.
+Cette séparation évite d'imposer les dépendances Location/Planning aux référentiels et au socle CRM, permet d'installer les listes métier sans forcer les dépendances Ventes/Projet et limite les impacts lors des évolutions.
 
 ## 1.5 Écarts principaux entre les DCF et le standard Odoo
 
@@ -142,8 +144,9 @@ Cette séparation évite d'imposer la dépendance Location tant que son modèle 
 | Contrôle fin des critères de conversion | Développement ciblé dans `egp_crm` |
 | Référentiels dépendants secteur/activité | Développement léger : modèle + domaine dynamique + contrainte |
 | Rôles Prospecteur/Commercial/ADV/Direction | Groupes, ACL, règles d'enregistrement et contrôles serveur spécifiques |
-| Espaces, périodes et disponibilité | Application Location à prototyper ; intégration isolée dans `egp_crm_rental`, sans supposer `appointment.resource` |
-| Option commerciale sur un espace | État CRM + document/période de Location ou mécanisme de maintien d'option à confirmer par prototype |
+| Espaces, périodes et disponibilité | Standard **Location + Planning** : produit de location de type Service, Rôle Planning et Matériels ; intégration CRM isolée dans `egp_crm_rental` |
+| Capacité d'accueil et configuration de salle | Caractéristiques de l'événement portées par `crm.lead`, jamais par le référentiel des espaces |
+| Option commerciale sur un espace | État CRM + commande de location ; mécanisme de maintien d'option avant commande à finaliser par `EGP-DEC-020` |
 | Contrat cadre mère/filles | Relations spécifiques sur `crm.lead` |
 | Création du projet événementiel | Développement spécifique validé dans `egp_crm_sale_project`, pouvant réutiliser `sale_project` comme socle |
 | KPI transverses CRM/Ventes/Projet/Facturation | Standard quand possible ; rapport SQL ou Spreadsheet dédié pour le reste |
@@ -188,7 +191,7 @@ Sauf validation complémentaire, les éléments suivants ne sont pas conçus en 
 - tableau de bord OWL entièrement sur mesure ;
 - application mobile spécifique.
 
-La sélection des espaces dans le CRM, l'espace principal, les options et le besoin de visualisation de disponibilité restent dans le périmètre. Leur portage technique dans l'application Location doit être consolidé avant développement de l'addon d'intégration.
+La sélection des espaces dans le CRM, l'espace principal, les options et le besoin de visualisation de disponibilité restent dans le périmètre. Leur portage technique repose sur le standard Location + Planning arrêté en `EGP-DEC-010A` ; seul le comportement de l'option non confirmée reste à finaliser (`EGP-DEC-020`).
 
 ## 2.4 Niveaux de priorité
 
@@ -241,8 +244,9 @@ Cette convention reprend la grille des DCF : rouge indispensable, orange souhait
 | Prospection sortante | Pistes | `crm.lead`, type `lead` | Pas de devis ni de négociation |
 | Besoin commercial | Opportunités | `crm.lead`, type `opportunity` | Référentiel de la décision commerciale |
 | Devis et commande | Ventes | `sale.order` | Le CRM ne duplique pas les versions de devis |
-| Location d'espaces | Location | Produits louables et documents/périodes de location ; modèle exact à confirmer | Source de vérité de la disponibilité et des **engagements** de location (une fois un document Location créé) |
-| Espaces et dates souhaités (intention) | CRM | Champs `egp_space_ids` / `egp_main_space_id` / `egp_event_start` / `egp_event_end`, cible technique à confirmer | Expriment un **besoin commercial** en qualification, avant toute réservation ; ne bloquent aucune disponibilité et ne dupliquent pas Location tant qu'aucun engagement n'existe |
+| Location d'espaces | Location + Planning | Produits de location de type Service, Rôles et Matériels Planning, commandes de location | Source de vérité de la disponibilité et des **engagements** de location (une fois la commande de location confirmée) |
+| Espaces et dates souhaités (intention) | CRM | Champs `egp_space_ids` / `egp_main_space_id` / `egp_event_start` / `egp_event_end` pointant vers les produits de location | Expriment un **besoin commercial** en qualification, avant toute réservation ; ne bloquent aucune disponibilité et ne dupliquent pas Location tant qu'aucun engagement n'existe |
+| Capacité d'accueil et configuration de salle | CRM | `egp_participant_count` et `egp_configuration_id` sur `crm.lead` | Caractéristiques de **l'événement**, jamais du référentiel des espaces (EGP-DEC-049) |
 | Production événementielle | Projet | `project.project` / `project.task` | Créée à la confirmation de commande et enrichie depuis le CRM par développement spécifique |
 | Factures et paiements | Comptabilité | `account.move` / paiements | Données remontées en lecture dans le CRM |
 | Documents | Pièces jointes/Documents | `ir.attachment` / `documents.document` | Liés à l'objet d'origine |
@@ -259,7 +263,7 @@ Le module Pistes contient les informations nécessaires à la prospection et à 
 
 ### Opportunités
 
-Le CRM contient le besoin, la stratégie commerciale, les options, les risques, le prévisionnel et les prochaines actions. La sélection d'un espace dans le CRM exprime un besoin commercial. La disponibilité et l'engagement effectif de location doivent être portés par l'application Location selon l'architecture à consolider en `EGP-DEC-010A` et `EGP-DEC-020`. Après confirmation, le CRM reste la référence de la relation commerciale ; le Projet devient la référence de la production.
+Le CRM contient le besoin, la stratégie commerciale, les options, les risques, le prévisionnel et les prochaines actions. La sélection d'un espace dans le CRM exprime un besoin commercial, tout comme le nombre de personnes attendues et la configuration de salle souhaitée. La disponibilité et l'engagement effectif de location sont portés par le couple Location + Planning selon l'architecture arrêtée en `EGP-DEC-010A`, le comportement de l'option non confirmée restant à finaliser en `EGP-DEC-020`. Après confirmation, le CRM reste la référence de la relation commerciale ; le Projet devient la référence de la production.
 
 ## 3.3 Origine des opportunités
 
@@ -367,17 +371,17 @@ Cette stratégie évite de dupliquer une même organisation entre la SCIC, MLK R
 ]
 ```
 
-### `egp_crm_rental` — conditionnel
+### `egp_crm_rental`
 
 ```python
 'depends': [
     'egp_crm',
     'sale_crm',
-    'sale_renting',  # nom technique à confirmer sur l'édition Enterprise cible
+    'sale_renting_planning',  # pont natif Location ↔ Planning ; amène sale_renting et sale_planning
 ]
 ```
 
-Cet addon n'est finalisé qu'après le prototype Location. Aucune dépendance à l'application Rendez-vous n'est retenue dans le socle CRM.
+`sale_renting_planning` est un module Enterprise en `auto_install` dès que Location et Planning sont installés ; il est néanmoins déclaré explicitement, car l'addon EGP en dépend fonctionnellement. Aucune dépendance à l'application Rendez-vous n'est retenue.
 
 ### `egp_crm_sale_project`
 
@@ -632,7 +636,7 @@ Le champ natif `user_id` peut représenter le responsable courant de l'enregistr
 | EGP-FLD-LEAD-007 | Source | `source_id` | `utm.source`, administrable |
 | EGP-FLD-LEAD-008 | Canal | `medium_id` | `utm.medium`, administrable |
 | EGP-FLD-LEAD-009 | Campagne | `campaign_id` | Optionnel, utile à la réactivation/ADN Data |
-| EGP-FLD-LEAD-010 | Organisation / contact | `commercial_partner_id`, `partner_id` | Facultatif pour un prospect inconnu ; obligatoire pour une réactivation de base clients. La logique réutilise l'entité commerciale du contact existant |
+| EGP-FLD-LEAD-010 | Organisation / contact | `partner_id` | Facultatif pour un prospect inconnu ; obligatoire pour une réactivation de base clients. Le formulaire Piste expose directement `partner_id` (widget de recherche/création de contact) à la place du champ texte natif `partner_name` : ce dernier n'est plus saisi librement, il reste seulement calculé en retrait depuis `partner_id` (EGP-DEC-050) |
 | EGP-FLD-LEAD-011 | Coordonnées de travail | `email_from`, `phone`, adresse | Synchronisées avec le contact selon le comportement standard |
 | EGP-FLD-LEAD-012 | Description / notes | `description` | Qualification générale ; les échanges restent dans le chatter |
 | EGP-FLD-LEAD-013 | CA potentiel | `expected_revenue` | Utilisé surtout après conversion ; non obligatoire sur piste |
@@ -669,7 +673,7 @@ Les champs suivants sont créés sur `crm.lead`. Ils restent présents après co
 | EGP-FLD-LEAD-114 | Fin événement | `egp_event_end` | Datetime | Conditionnel ; postérieure au début |
 | EGP-FLD-LEAD-115 | Budget client | `egp_client_budget` | Monetary | Non |
 | EGP-FLD-LEAD-116 | Devise budget | `company_currency` | Many2one `res.currency` calculé | Devise de la société ; budget exprimé dans cette devise |
-| EGP-FLD-LEAD-117 | Espaces souhaités | `egp_space_ids` | Many2many vers le modèle d'espace retenu pour Location, cible à confirmer | Non sur piste ; sélection commerciale uniquement, sans engagement de location |
+| EGP-FLD-LEAD-117 | Espaces souhaités | `egp_space_ids` | Many2many `product.product`, domaine `[('rent_ok', '=', True)]` | Non sur piste ; sélection commerciale uniquement, sans engagement de location |
 | EGP-FLD-LEAD-118 | Description du besoin | `egp_need_description` | Html | Oui avant conversion |
 | EGP-FLD-LEAD-119 | Contraintes | `egp_constraints` | Html/Text | Non |
 | EGP-FLD-LEAD-120 | Objectifs du client | `egp_client_objectives` | Html/Text | Non |
@@ -857,14 +861,14 @@ Exemple apporteur : Agence Alpha signale l'affaire, EGP contracte directement av
 
 Les champs `egp_event_type_id`, `egp_event_start`, `egp_event_end`, `egp_event_period_note`, `egp_participant_count`, `egp_market_segment_id`, `egp_space_ids`, `egp_need_description`, `egp_constraints` et `egp_client_objectives` sont communs aux pistes et opportunités.
 
-Le **nombre de personnes** attendues sur l'événement est porté par le champ commun `egp_participant_count` (EGP-FLD-LEAD-111) ; il est affiché dans le bloc Événement de l'opportunité et sert de référence pour vérifier l'adéquation avec la capacité des espaces envisagés. Aucun champ distinct n'est créé.
+Le **nombre de personnes** attendues sur l'événement est porté par le champ commun `egp_participant_count` (EGP-FLD-LEAD-111) ; il est affiché dans le bloc Événement de l'opportunité, aux côtés de la **configuration de salle** retenue (`egp_configuration_id`) dont il dépend directement. Ces deux informations décrivent l'événement et non la salle : aucune capacité n'est stockée sur le référentiel des espaces (EGP-DEC-049, §7.3.1). Aucun champ distinct n'est créé.
 
 Champs complémentaires utilisés principalement après conversion :
 
 | ID | Nom fonctionnel | Nom technique | Type | Règle |
 |---|---|---|---|---|
-| EGP-FLD-OPP-020 | Espace principal | `egp_main_space_id` | Many2one vers le modèle d'espace Location retenu, cible à confirmer | Doit appartenir à `egp_space_ids` |
-| EGP-FLD-OPP-021 | Configuration | `egp_configuration_id` | Many2one `egp.event.configuration` | Référentiel configurable |
+| EGP-FLD-OPP-020 | Espace principal | `egp_main_space_id` | Many2one `product.product`, domaine `[('rent_ok', '=', True)]` | Doit appartenir à `egp_space_ids` |
+| EGP-FLD-OPP-021 | Configuration de salle | `egp_configuration_id` | Many2one `egp.event.configuration` | Référentiel configurable ; caractéristique de l'événement, pas de la salle (EGP-DEC-049) |
 | EGP-FLD-OPP-022 | Montage prévu | `egp_setup_required` | Boolean | Non |
 | EGP-FLD-OPP-023 | Démontage prévu | `egp_teardown_required` | Boolean | Non |
 | EGP-FLD-OPP-024 | Début montage | `egp_setup_start` | Datetime | Conditionnel |
@@ -879,25 +883,57 @@ Champs complémentaires utilisés principalement après conversion :
 
 ### 7.3.1 Référentiel et disponibilité des espaces
 
-> **Architecture réouverte en V0.3.** EGP souhaite vendre de la location d'espaces avec l'application **Location**. La première hypothèse `appointment.resource` n'est donc plus considérée comme validée. L'application Location gère des produits louables, des périodes et des commandes de location ; le modèle exact à relier au CRM doit être confirmé sur la base Odoo 19 Enterprise cible.
+> **Décision validée — EGP-DEC-010A (V0.6).** L'architecture des espaces repose intégralement sur le standard Odoo 19 Enterprise, selon le schéma documenté par Odoo pour les **produits de service physiques** de l'application Location :
+>
+> - chaque **espace commercialisable** est un **produit de location de type Service** — `product.template` avec `type = 'service'`, `rent_ok = True` et politique de facturation « Prépayé / Prix fixe » ;
+> - ce produit est rattaché à un **Rôle** de l'application Planning (`planning.role`), sur lequel l'option **« Synchroniser les shifts et les commandes de location »** (`sync_shift_rental`) est activée ;
+> - chaque **salle physique** est un **Matériel** Planning, c'est-à-dire une ressource `resource.resource` de type `material` rattachée à ce Rôle ;
+> - le module de pont natif **`sale_renting_planning`** assure l'affectation d'une salle libre par ligne de commande, le contrôle de disponibilité et la synchronisation des périodes entre la commande de location et les créneaux Planning.
+>
+> **Aucun modèle `egp.space` n'est créé.** La variante « espace métier lié à un produit de location » est abandonnée : les seules données qui la justifiaient — capacité et configuration de salle — relèvent de l'événement et non de la salle (EGP-DEC-049 ci-dessous).
 
-Deux variantes sont à prototyper :
+#### Capacité et configuration : caractéristiques de l'événement
 
-1. **Espace = produit de location.** Chaque salle/lieu commercialisable est un produit ou une variante louable. `egp_space_ids` et `egp_main_space_id` pointent directement vers le produit de location.
-2. **Espace métier lié à un produit de location.** Un modèle léger `egp.space` porte les informations propres au lieu — capacité, localisation, configurations permises — et possède un lien obligatoire vers le produit louable utilisé par Location. Cette variante n'est retenue que si le catalogue Location ne couvre pas proprement les données métier nécessaires.
+> **Décision validée — EGP-DEC-049 (V0.6).** La **capacité d'accueil** et la **configuration de salle** ne sont pas des attributs du référentiel des espaces. Une même salle accueille un nombre de personnes très différent selon la disposition retenue — théâtre, classe, U, cocktail, banquet — et cette disposition est choisie **pour un événement donné**. Ces informations sont donc portées par le `crm.lead` :
+>
+> - le **nombre de personnes** attendues est `egp_participant_count` (EGP-FLD-LEAD-111) ;
+> - la **configuration retenue** est `egp_configuration_id` (EGP-FLD-OPP-021), alimentée par le référentiel administrable `egp.event.configuration` (EGP-REF-111).
+>
+> Conséquences directes :
+>
+> - aucun champ de capacité n'est ajouté sur le produit de location ni sur le matériel Planning, et aucune extension de `resource.resource` n'est nécessaire ;
+> - aucune contrainte serveur ne compare `egp_participant_count` à une capacité de salle : l'adéquation effectif / disposition / espace relève du jugement commercial et de la documentation d'exploitation ;
+> - si une grille « configuration × espace → capacité maximale » devient nécessaire, elle sera traitée comme une **évolution P2** dans `egp_crm_rental`, sans modifier le catalogue Location ni le référentiel Planning.
 
-Principes invariants :
+#### Couverture native vérifiée
 
-- `egp_space_ids` décrit les espaces envisagés ; il ne doit pas créer seul un engagement de location ;
+| Besoin | Mise en œuvre native |
+|---|---|
+| Catalogue des espaces | Produits de location de type Service, administrés par le groupe Gestionnaire des espaces |
+| Plusieurs salles équivalentes d'un même type | Un Rôle Planning regroupe N Matériels ; `sale_renting_planning` affecte une salle libre par ligne et n'attribue jamais deux fois le même matériel sur une période chevauchante |
+| Plusieurs salles distinctes dans une même affaire | Une ligne de commande de location par espace, chacune liée à son propre Rôle |
+| Disponibilité multi-jours | Croisement des créneaux `planning.slot` existants et des indisponibilités `resource.calendar.leaves` sur l'intégralité de la période demandée |
+| Conflit de réservation | **Blocage natif à la confirmation** : la commande ne peut pas être confirmée si aucun matériel n'est disponible pour la période, dès lors que `sync_shift_rental` est actif sur le Rôle |
+| Temps de battement / remise en état | Champ natif « Réserver le produit » du produit de location, qui rend l'espace indisponible entre deux locations |
+| Montage et démontage | Portés par la période d'occupation `egp_occupancy_start` → `egp_occupancy_end`, transmise aux dates de location |
+| Brouillon, devis, commande | Cycle natif `sale.order` : devis, devis envoyé, commande confirmée |
+| Synchronisation des dates | Native entre la commande de location et les créneaux Planning, dans les deux sens |
+| Annulation et report | Cycle natif `sale.order` ; les créneaux liés sont mis à jour ou supprimés en conséquence |
+| Affichage calendrier / Gantt | Vue Gantt native « Réservations » de Location et vues Planning par ressource |
+
+Principes invariants confirmés :
+
+- `egp_space_ids` et `egp_main_space_id` pointent vers `product.product` avec le domaine `[('rent_ok', '=', True)]` ;
+- `egp_space_ids` décrit les espaces envisagés et ne crée seul aucun engagement de location ;
 - `egp_main_space_id` est conservé pour le reporting et doit appartenir aux espaces envisagés ;
 - si un seul espace est sélectionné, il est proposé automatiquement comme espace principal ;
 - la période d'occupation couvre le montage et le démontage lorsqu'ils sont renseignés ;
-- la source de vérité de la disponibilité doit rester unique et être celle de Location ;
-- aucun double référentiel Rendez-vous + Location n'est créé.
+- la source de vérité de la disponibilité reste unique : les créneaux Planning issus des commandes de location ;
+- aucun double référentiel de disponibilité n'est créé, et aucune dépendance à l'application Rendez-vous n'est introduite.
 
-Le prototype Location doit vérifier : disponibilité multi-jours, plusieurs salles dans une même affaire, capacité, temps de battement, périodes de montage/démontage, brouillon/devis/commande, annulation, report, affichage calendrier/Gantt et comportement d'une option non encore confirmée.
+**Comportement natif vérifié pour les devis non confirmés.** Les créneaux Planning ne sont générés qu'à la **confirmation** de la commande de location : un devis en brouillon ou envoyé ne consomme donc aucune disponibilité. Cette caractéristique est structurante pour la phase d'option décrite au §7.6 et constitue le périmètre restant d'`EGP-DEC-020`.
 
-`EGP-DEC-010A` et `EGP-DEC-020` restent ouverts jusqu'à ce prototype. `EGP-DEC-010B` valide en revanche que les listes, capacités, configurations et prestations doivent être administrables ; leurs valeurs initiales restent à fournir.
+`EGP-DEC-010B` reste applicable : les listes de configurations, de prestations et le catalogue des espaces sont administrables ; leurs valeurs initiales restent à fournir.
 
 ## 7.4 Bloc Prestations
 
@@ -941,10 +977,10 @@ Les produits effectivement vendus restent les lignes de devis `sale.order.line`.
 
 > **Modèle en deux temps — clarification EGP-DEC-020 (source de vérité).** Il n'y a pas de double source de vérité, mais un enchaînement de deux phases distinctes :
 >
-> 1. **Intention commerciale (qualification).** Les dates, la période et les salles souhaitées sont saisies sur le `crm.lead` (`egp_event_start/end`, `egp_space_ids`, `egp_main_space_id`) dès la qualification. À ce stade, **aucune réservation n'existe dans Location** : ces champs expriment un besoin et ne détiennent donc aucune donnée dupliquée. Le `crm.lead` est la source de vérité de l'intention.
-> 2. **Engagement (option/réservation).** Dès qu'une option ferme ou une réservation est matérialisée par un document Location, **la disponibilité et la période engagée deviennent la propriété de Location**. À partir de là, l'opportunité **reflète en lecture** le document Location via `egp_space_booking_ids` (related/computed), sans en détenir une copie éditable indépendante.
+> 1. **Intention commerciale (qualification).** Les dates, la période, les salles souhaitées, le nombre de personnes et la configuration de salle sont saisis sur le `crm.lead` (`egp_event_start/end`, `egp_space_ids`, `egp_main_space_id`, `egp_participant_count`, `egp_configuration_id`) dès la qualification. À ce stade, **aucune réservation n'existe** : ces champs expriment un besoin et ne dupliquent aucune donnée de Location. Le `crm.lead` est la source de vérité de l'intention.
+> 2. **Engagement (réservation).** La disponibilité n'est consommée qu'à la **confirmation de la commande de location** : `sale_renting_planning` génère alors les créneaux Planning, affecte une salle libre à chaque ligne et refuse la confirmation si aucun matériel n'est disponible. À partir de là, **la période engagée appartient à Location/Planning** et l'opportunité la **reflète en lecture** via `egp_space_booking_ids`, sans en détenir une copie éditable.
 >
-> Les champs `egp_option_start/end` et `egp_option_space_ids` ci-dessous ne servent qu'à la phase de **maintien d'option** tant qu'aucun document Location n'existe (« pré-réservation » non engageante). Après création du document Location, ils sont alimentés en lecture depuis celui-ci. Le comportement exact (maintien d'option custom ou objet Location natif) est fixé par le prototype (EGP-DEC-020).
+> **Conséquence structurante vérifiée :** un devis de location en brouillon ou envoyé ne bloque **rien** nativement. L'option commerciale — réserver un espace à un client pendant une durée limitée avant signature — n'est donc pas couverte par le standard et constitue le périmètre restant d'`EGP-DEC-020`. Les champs `egp_option_start/end` et `egp_option_space_ids` servent à cette phase de **maintien d'option** ; après confirmation de la commande, ils sont alimentés en lecture depuis celle-ci.
 >
 > Deux mécanismes garantissent la fluidité entre les deux phases : la **vérification de disponibilité en qualification** (EGP-RG-034C, informative, sans réservation) et la **reprise automatique des données de qualification dans le devis de location** (EGP-RG-034B, pour éviter toute ressaisie par le Commercial).
 
@@ -952,55 +988,60 @@ Les produits effectivement vendus restent les lignes de devis `sale.order.line`.
 | ID | Nom fonctionnel | Nom technique | Type | Règle |
 |---|---|---|---|---|
 | EGP-FLD-OPP-070 | Option en cours | `egp_option_active` | Boolean | Ne change pas l'étape |
-| EGP-FLD-OPP-071 | Début d'option | `egp_option_start` | Datetime | Obligatoire si option active ; reflet du document Location une fois celui-ci créé |
-| EGP-FLD-OPP-072 | Fin d'option | `egp_option_end` | Datetime | Obligatoire si option active ; reflet du document Location une fois celui-ci créé |
-| EGP-FLD-OPP-073 | Espaces sous option | `egp_option_space_ids` | Many2many vers le modèle d'espace Location retenu | Obligatoire si option active ; reflet du document Location une fois celui-ci créé |
+| EGP-FLD-OPP-071 | Début d'option | `egp_option_start` | Datetime | Obligatoire si option active ; reflet de la commande de location une fois celle-ci confirmée |
+| EGP-FLD-OPP-072 | Fin d'option | `egp_option_end` | Datetime | Obligatoire si option active ; reflet de la commande de location une fois celle-ci confirmée |
+| EGP-FLD-OPP-073 | Espaces sous option | `egp_option_space_ids` | Many2many `product.product` louables | Obligatoire si option active ; reflet de la commande de location une fois celle-ci confirmée |
 | EGP-FLD-OPP-074 | État d'option | `egp_option_status` | Selection `none`/`active`/`expiring`/`expired`/`confirmed`/`released` | Les valeurs `expiring`/`expired` dépendent du temps : elles sont rafraîchies par cron, pas par un simple `@api.depends` |
 | EGP-FLD-OPP-075 | Date de décision sur option | `egp_option_decision_date` | Datetime | Traçabilité |
 | EGP-FLD-OPP-076 | Commentaire option | `egp_option_notes` | Text | Non |
-| EGP-FLD-OPP-077 | Document/période Location lié | `egp_space_booking_ids` | Relation technique à confirmer vers les objets Location | Lecture depuis l'opportunité ; source de vérité de la période engagée ; mapping validé par prototype |
-| EGP-FLD-OPP-078 | Disponibilité des espaces envisagés | `egp_space_availability_state` | Selection `unknown`/`available`/`partial`/`conflict` calculé non stocké | Interrogation de Location à la volée pour la période qualifiée ; jamais un référentiel de disponibilité parallèle |
+| EGP-FLD-OPP-077 | Réservations de location liées | `egp_space_booking_ids` | Relation vers les lignes de location `sale.order.line` et leurs créneaux `planning.slot` | Lecture depuis l'opportunité ; source de vérité de la période engagée et de la salle physique affectée |
+| EGP-FLD-OPP-078 | Disponibilité des espaces envisagés | `egp_space_availability_state` | Selection `unknown`/`available`/`partial`/`conflict` calculé non stocké | Interrogation des matériels et créneaux Planning à la volée pour la période qualifiée ; jamais un référentiel de disponibilité parallèle |
 | EGP-FLD-OPP-079 | Dates de location synchronisées | `egp_rental_dates_synced` | Boolean calculé non stocké | Faux si les dates d'un devis de location lié divergent de l'opportunité ; déclenche le bandeau de mise à jour (EGP-RG-034D) |
 
 **EGP-RG-032 — Option complète.** L'activation est refusée si les dates ou espaces sont absents.
 
 **EGP-RG-033 — Expiration.** Une activité est créée avant échéance selon les paramètres administrables. Une option expirée sans décision est signalée au Commercial puis à la Responsable commerciale. L'automatisation ne confirme ni ne libère automatiquement l'espace sans décision humaine.
 
-**EGP-RG-034 — Disponibilité.** La sélection d'un espace dans `egp_space_ids` ne réserve rien. Le mécanisme qui bloque une période doit être porté par Location ou par une extension minimale de maintien d'option liée à Location.
+**EGP-RG-034 — Disponibilité.** La sélection d'un espace dans `egp_space_ids` ne réserve rien, pas plus qu'un devis de location non confirmé. Le blocage effectif d'une période résulte de la confirmation d'une commande de location, qui génère les créneaux Planning correspondants.
 
-**EGP-RG-034A — Conflits.** `EGP-DEC-020` reste à consolider. Le prototype doit déterminer si un devis de location non confirmé bloque déjà la disponibilité, si une commande confirmée est nécessaire et comment représenter une option commerciale. Le comportement final pourra être : blocage strict, avertissement avec dérogation manager, ou maintien d'option custom synchronisé avec Location. Aucun choix n'est codé avant ce test.
+**EGP-RG-034A — Conflits.** Le comportement natif est établi : à la confirmation d'une commande de location, `sale_renting_planning` recherche un matériel libre du Rôle pour chaque ligne et **refuse la confirmation** si aucun n'est disponible sur la période, dès lors que `sync_shift_rental` est actif. Ce blocage strict est retenu comme comportement de référence ; aucun contournement ne lui est ajouté.
 
-**EGP-RG-034B — Reprise des données de qualification dans le devis de location.** Lorsque le Commercial déclenche la création du devis depuis l'opportunité (action native `sale_crm` « Nouveau devis »), les informations déjà saisies en qualification sont **transmises automatiquement** pour éviter toute ressaisie. La reprise est réalisée en surchargeant la préparation du `sale.order` créé depuis le `crm.lead` (contexte `default_*` et/ou valeurs préparées côté serveur), sans modifier le flux natif. Le mapping minimal attendu, à confirmer sur la base Location cible (EGP-DEC-020) :
+Deux points restent à finaliser dans le périmètre résiduel d'`EGP-DEC-020` :
+
+1. **Représentation de l'option non confirmée.** Comme un devis ne consomme aucune disponibilité, deux commerciaux peuvent poser une option sur la même salle et la même période. Le comportement cible doit être arbitré : avertissement non bloquant au moment de poser l'option, blocage avec dérogation de la Responsable commerciale, ou création d'un créneau Planning d'option dédié libéré à l'expiration.
+2. **Message d'erreur natif.** Le message renvoyé par le standard à la confirmation reste technique ; un libellé métier explicite — espace, période et affaire concurrente — sera ajouté dans `egp_crm_rental` sans modifier la logique de blocage.
+
+**EGP-RG-034B — Reprise des données de qualification dans le devis de location.** Lorsque le Commercial déclenche la création du devis depuis l'opportunité (action native `sale_crm` « Nouveau devis »), les informations déjà saisies en qualification sont **transmises automatiquement** pour éviter toute ressaisie. La reprise est réalisée en surchargeant la préparation du `sale.order` créé depuis le `crm.lead` (contexte `default_*` et/ou valeurs préparées côté serveur), sans modifier le flux natif. Mapping attendu :
 
 | Donnée de qualification (opportunité) | Cible dans le devis de location |
 |---|---|
 | Client, contacts, société (`partner_id`, contacts, `company_id`) | En-tête du `sale.order` (déjà géré par `sale_crm`, à conserver) |
-| Période qualifiée (`egp_event_start/end`, occupation montage/démontage) | Dates de location des lignes (`rental_start_date`/`rental_return_date` de l'app Location) |
-| Espaces envisagés (`egp_space_ids`, `egp_main_space_id`) | Une ligne de devis de location par espace, à partir du produit louable correspondant |
+| Période qualifiée (`egp_event_start/end`, occupation montage/démontage) | Dates de location de la commande (`rental_start_date` / `rental_return_date`) |
+| Espaces envisagés (`egp_space_ids`, `egp_main_space_id`) | Une ligne de devis de location par espace, à partir du produit de location de service correspondant |
+| Nombre de personnes et configuration (`egp_participant_count`, `egp_configuration_id`) | Note structurée sur la ligne d'espace concernée ; ces valeurs décrivent la prestation et ne déterminent aucune quantité automatiquement |
 | Besoins de prestations (`egp_catering_*`, `egp_av_*`, `egp_furniture_*`, `egp_animation_*`, autres) | Lignes de devis pré-remplies ou note structurée d'aide à la saisie de l'offre |
 | Éléments commerciaux (`egp_client_budget`, conditions, remise à valider) | Champs et notes correspondants du devis, sans écraser une saisie manuelle existante |
 
 La reprise n'écrase jamais une valeur déjà saisie manuellement sur un devis existant ; elle n'alimente que la création initiale. Les lignes générées restent modifiables : elles constituent une aide à la saisie, la source de vérité de l'offre demeurant les `sale.order.line`. L'évolution des dates **après** cette création initiale est traitée par EGP-RG-034D.
 
-**EGP-RG-034C — Vérification de disponibilité en qualification.** Pendant la qualification, le Commercial doit pouvoir vérifier **simplement et sans quitter le CRM** si un espace est libre sur la période souhaitée, de manière Odoo-friendly et sans créer de second référentiel de disponibilité :
+**EGP-RG-034C — Vérification de disponibilité en qualification.** Pendant la qualification, le Commercial doit pouvoir vérifier **simplement et sans quitter le CRM** si un espace est libre sur la période souhaitée, sans créer de second référentiel de disponibilité :
 
-- un **smart button** « Vérifier la disponibilité » ouvre la vue **calendrier/Gantt de Location** filtrée sur les espaces envisagés (`egp_space_ids`) et la période qualifiée ; la source de vérité reste Location ;
-- un **badge d'état** `egp_space_availability_state` (EGP-FLD-OPP-078) affiche visuellement le résultat (`available` vert / `partial` orange / `conflict` rouge / `unknown` gris) au moyen d'une décoration de champ standard ; il est **calculé à la volée** en interrogeant les réservations Location pour la période, et **non stocké** car il dépend du temps et de l'état des autres affaires (principe EGP-DEC-044) ;
-- l'indicateur est purement informatif en qualification : il **ne pose ni option ni réservation** et ne bloque aucune période. Le blocage effectif relève de la phase d'engagement (EGP-RG-034 / EGP-RG-034A) une fois un document Location créé.
-
-Le mode de calcul exact (appel au moteur de disponibilité Location vs lecture des documents de location existants) est fixé par le prototype (EGP-DEC-020).
+- un **smart button** « Vérifier la disponibilité » ouvre la vue **Planning par ressource** filtrée sur les Rôles des espaces envisagés (`egp_space_ids`) et la période qualifiée, sur le modèle de l'action native « Voir le planning » de la commande de location ;
+- un **badge d'état** `egp_space_availability_state` (EGP-FLD-OPP-078) affiche visuellement le résultat (`available` vert / `partial` orange / `conflict` rouge / `unknown` gris) au moyen d'une décoration de champ standard. Il est **calculé à la volée** en réutilisant la logique native de recherche de matériel disponible — créneaux `planning.slot` et indisponibilités `resource.calendar.leaves` du Rôle sur la période — et **non stocké**, car il dépend du temps et de l'état des autres affaires (principe EGP-DEC-044) ;
+- l'indicateur est purement informatif : il **ne pose ni option ni réservation** et ne bloque aucune période. Le blocage effectif relève de la confirmation de la commande (EGP-RG-034 / EGP-RG-034A).
 
 **EGP-RG-034D — Évolution des dates après création du devis.** Après la reprise initiale (EGP-RG-034B), le devis de location est autonome : il n'est **pas** resynchronisé silencieusement à chaque modification de l'opportunité, afin de ne jamais écraser un travail commercial en cours. Le principe retenu, calqué sur le comportement natif d'Odoo lorsqu'une position fiscale devient incohérente, est un **rappel non bloquant avec confirmation humaine** :
 
 - la **modification de la date reste saisie dans le CRM** (`egp_event_start/end` et occupation), ce qui garantit sa **traçabilité dans le chatter** de l'opportunité (champs `tracking=True`) ;
 - un champ technique `egp_rental_dates_synced` (Boolean calculé non stocké) compare les dates de l'opportunité aux dates de location des devis liés non confirmés et détecte une **divergence** ;
 - à l'ouverture d'un devis de location dont les dates divergent de l'opportunité, un **bandeau d'alerte** (widget `alert`, non bloquant) s'affiche avec un **bouton « Mettre à jour les dates de location »** ; l'ADV ou le Commercial déclenche explicitement la mise à jour, exactement comme le bouton natif proposé lors d'un changement de position fiscale ;
-- l'action du bouton reporte les dates de l'opportunité sur les lignes de location du devis (`rental_start_date`/`rental_return_date`) et journalise l'opération dans le chatter du devis ;
-- **aucune mise à jour automatique** n'est appliquée : le devis n'est modifié qu'après validation manuelle, ce qui préserve les ajustements déjà faits par le Commercial.
+- l'action du bouton reporte les dates de l'opportunité sur la commande de location (`rental_start_date` / `rental_return_date`) et journalise l'opération dans le chatter du devis ;
+- **aucune mise à jour automatique** n'est appliquée : le devis n'est modifié qu'après validation manuelle, ce qui préserve les ajustements déjà faits par le Commercial ;
+- une fois les dates reportées sur un document déjà confirmé, la **propagation vers les créneaux Planning est native** : aucun code spécifique n'est écrit pour resynchroniser les shifts.
 
 **Plusieurs devis liés.** La mise à jour est traitée **devis par devis, uniquement à l'ouverture du devis concerné**. Il n'y a **pas** de propagation groupée à tous les devis liés : chaque devis en brouillon affiche son propre bandeau lorsqu'il diverge et n'est resynchronisé que lorsque l'utilisateur l'ouvre et confirme via le bouton. Un devis jamais rouvert n'est pas modifié. Le champ `egp_rental_dates_synced` reflète cette divergence par devis.
 
-Cas des documents **confirmés** : sur une commande de location confirmée, la modification de dates n'est pas un simple report de champ (impacts disponibilité, prix, logistique). Le bandeau signale l'écart et invite à traiter la commande selon la procédure d'engagement (EGP-RG-034 / EGP-RG-034A) ; la resynchronisation directe des dates y est **désactivée** ou soumise à un droit dédié, à trancher avec le prototype (EGP-DEC-020).
+Cas des documents **confirmés** : sur une commande de location confirmée, la modification de dates n'est pas un simple report de champ (impacts disponibilité, prix, logistique) et peut échouer si la salle affectée n'est plus libre sur la nouvelle période. Le bandeau signale l'écart et invite à traiter la commande selon la procédure d'engagement (EGP-RG-034 / EGP-RG-034A) ; la resynchronisation directe y est **soumise à un droit dédié** et l'échec de réaffectation doit être restitué par un message métier explicite.
 
 ## 7.7 Signaux commerciaux
 
@@ -1180,7 +1221,8 @@ Règles communes :
 | EGP-REF-007 | Étape CRM | `crm.stage` | Gérée par Responsable/Admin selon sécurité |
 | EGP-REF-008 | Rôles de contacts | `res.partner.category` sous racine EGP | Valeurs Décideur, Signataire, Contact principal, Contact secondaire |
 | EGP-REF-009 | Tags CRM généraux | `crm.tag` | Usage limité aux besoins non couverts par les champs structurés |
-| EGP-REF-010 | Catalogue des espaces louables | Catalogue Location, candidat `product.template` / `product.product` | Modèle final à confirmer par prototype ; administration par les Gestionnaires des espaces |
+| EGP-REF-010 | Catalogue des espaces louables | `product.template` / `product.product` de type Service avec `rent_ok = True` | Administré par les Gestionnaires des espaces |
+| EGP-REF-011 | Rôles et matériels des espaces | `planning.role` et `resource.resource` de type `material` | Un Rôle par produit d'espace, un Matériel par salle physique ; administré par les Gestionnaires des espaces |
 
 ## 8.3 Référentiels spécifiques
 
@@ -1195,7 +1237,7 @@ Règles communes :
 | EGP-REF-107 | `egp.contact.channel` | Canal préféré | Téléphone, E-mail, Mobile/SMS, Visioconférence, Autre |
 | EGP-REF-108 | `egp.administrative.region` | Région française | Table de correspondance à charger si retenue |
 | EGP-REF-109 | `egp.event.type` | Type d'événement | Hiérarchique (catégorie via `parent_id`) ; liste fournie au §8.10 (EGP-DEC-009) |
-| EGP-REF-111 | `egp.event.configuration` | Configuration de salle | Théâtre, classe, U, cocktail, banquet, etc. à valider |
+| EGP-REF-111 | `egp.event.configuration` | Configuration de salle retenue pour l'événement | Théâtre, classe, U, cocktail, banquet, etc. à valider ; caractéristique de l'événement, pas de la salle (EGP-DEC-049) |
 | EGP-REF-112 | `egp.catering.type` | Types de restauration | Valeurs à valider avec MLK Restauration |
 | EGP-REF-113 | `egp.technical.level` | Niveau audiovisuel/technique | Valeurs à valider |
 | EGP-REF-114 | `egp.animation.type` | Types d'animation | Valeurs à valider |
@@ -1378,8 +1420,9 @@ CRM
 │   └── Réservations liées aux opportunités
 └── Configuration EGP
     ├── Types d'événement
-    ├── Catalogue des espaces — action Location, modèle à confirmer
-    ├── Configurations
+    ├── Catalogue des espaces — action Location, produits de service louables
+    ├── Rôles et matériels des espaces — action Planning
+    ├── Configurations de salle
     ├── Restauration
     ├── Niveaux techniques
     ├── Animations
@@ -1536,7 +1579,6 @@ Colonnes selon le pipeline commercial. Carte :
 - prochaine activité/retard ;
 - date limite d'option ;
 - badges Grand compte, Contrat cadre, Appel d'offres, Option, Acompte en attente, Dossier à risque ;
-- société Odoo si l'utilisateur travaille en multi-sociétés.
 
 ### EGP-VIEW-OPP-002 — Formulaire Opportunité
 
@@ -1612,23 +1654,23 @@ Regroupements : Commercial, étape, mois d'événement, type d'événement, type
 
 ### EGP-VIEW-SPACE-001 — Disponibilité et occupation des espaces
 
-Cette action s'appuie sur les données de l'application Location et sur le modèle d'espace retenu après prototype.
+Cette action s'appuie sur les créneaux Planning générés par les commandes de location et sur le catalogue des produits de location retenus en `EGP-DEC-010A`.
 
 Exigences d'affichage :
 
 - période jour, semaine, mois et plage personnalisée ;
 - filtre par salle/lieu, société, état d'option et état de confirmation ;
 - distinction lisible entre option active, location confirmée, indisponibilité technique et location libérée/annulée ;
-- accès direct à l'opportunité, au client et au document Location ;
+- accès direct à l'opportunité, au client et à la commande de location ;
 - prise en compte de la période d'occupation montage → démontage ;
 - détection immédiate des chevauchements ;
-- représentation par ligne d'espace lorsque la vue native/configurée le permet.
+- représentation par ligne d'espace, assurée nativement par la vue Planning groupée par ressource.
 
-La V1 doit fournir au minimum la vue native Location pertinente et une liste filtrable. Une vue Gantt/XML complémentaire n'est ajoutée qu'après constat documenté d'un manque du standard et sans créer un second moteur de disponibilité.
+La V1 s'appuie sur les vues natives — Gantt « Réservations » de Location et Planning par ressource — complétées d'actions filtrées et de listes. Une vue Gantt/XML spécifique n'est ajoutée qu'après constat documenté d'un manque du standard et sans créer un second moteur de disponibilité.
 
 ## 9.5 Vues des référentiels
 
-Chaque référentiel spécifique EGP dispose d'une vue Liste modifiable et d'un formulaire simple. Les valeurs archivées sont masquées par défaut. Le menu n'est visible qu'au groupe Administrateur des référentiels et à l'Administrateur Odoo. Les salles et lieux sont administrés dans Location par le groupe Gestionnaire des espaces ; un modèle `egp.space` n'est créé que si le prototype démontre que le produit louable ne suffit pas.
+Chaque référentiel spécifique EGP dispose d'une vue Liste modifiable et d'un formulaire simple. Les valeurs archivées sont masquées par défaut. Le menu n'est visible qu'au groupe Administrateur des référentiels et à l'Administrateur Odoo. Les salles et lieux ne sont pas des référentiels EGP : ils sont administrés dans Location et Planning par le groupe Gestionnaire des espaces, conformément à `EGP-DEC-010A`. Le référentiel `egp.event.configuration` décrit les dispositions de salle proposées aux clients et reste indépendant du catalogue des espaces.
 
 Pour `egp.business.activity`, la liste affiche le secteur, l'activité, le code, l'ordre et l'état actif. Un filtre/regroupement par secteur est fourni.
 
@@ -1740,7 +1782,7 @@ Les identifiants CRM-AUTO-001 à CRM-AUTO-013 reprennent ceux du DCF CRM.
 | CRM-AUTO-001 | Création d'une opportunité | Affecter le Commercial, activité initiale, reprise des données, notification | `create()` / conversion / règle d'affectation | P0 |
 | CRM-AUTO-002 | Changement d'étape | Historiser, contrôler et proposer la prochaine activité ; conserver le calcul de probabilité natif Odoo | `write()` ciblé + mécanismes natifs de probabilité | P0 |
 | CRM-AUTO-003 | Devis envoyé | Mémoriser date, créer relance à J+N, recalculer si nouvelle version | Hook `sale.order` + activité idempotente | P0 |
-| CRM-AUTO-004 | Option posée | Contrôler dates/espaces, créer ou mettre à jour l'objet Location ou le maintien d'option retenu, planifier rappel et alerter à expiration | `egp_crm_rental` après prototype Location + cron | P0 |
+| CRM-AUTO-004 | Option posée | Contrôler dates/espaces, matérialiser le maintien d'option retenu, planifier rappel et alerter à expiration | `egp_crm_rental` selon `EGP-DEC-020` + cron | P0 |
 | CRM-AUTO-005 | Commande confirmée | Passer à Gagnée/Confirmée, créer/lier un projet unique, transférer les champs CRM autorisés, checklist et notifications | Hook `action_confirm()` + service spécifique `egp_crm_sale_project` | P0 |
 | CRM-AUTO-006 | Remise > seuil | Bloquer l'action, demander validation et tracer la décision | Règle d'approbation Odoo Studio sur le bouton concerné | P0 |
 | CRM-AUTO-007 | Opportunité inactive | Notifier Commercial, afficher À traiter, escalader si persistance | Rotting natif + cron d'escalade | P1 |
@@ -1963,14 +2005,15 @@ Les ACL restent générales au modèle ; la distinction piste/opportunité est r
 | `sale.order` | R selon besoin | Droits Ventes | Droits manager | Droits ADV | R | — | complet |
 | `project.project` | R selon conversion | R commercial | R | R | R | — | complet |
 
-ACL complémentaires pour Location — modèles exacts à confirmer par prototype :
+ACL complémentaires pour Location et Planning :
 
 | Modèle / objet | Prospecteur | Commercial | Resp. commerciale | ADV | Direction | Gestionnaire espaces | Admin Odoo |
 |---|---|---|---|---|---|---|---|
-| Catalogue des espaces louables | R | R | R/C/W/A | R/C/W/A | R | R/C/W/A | Complet |
-| Documents/périodes de Location | R si dossier visible | R/C/W sur ses affaires selon droits Ventes | R/C/W global société | R/C/W administratif | R | R/C/W/A global société | Complet |
+| Produits de location des espaces | R | R | R/C/W/A | R/C/W/A | R | R/C/W/A | Complet |
+| Rôles et matériels Planning des espaces | R | R | R/C/W/A | R/C/W/A | R | R/C/W/A | Complet |
+| Commandes de location et créneaux liés | R si dossier visible | R/C/W sur ses affaires selon droits Ventes | R/C/W global société | R/C/W administratif | R | R/C/W/A global société | Complet |
 
-La Responsable commerciale, l'ADV et l'Administrateur Odoo appartiennent au groupe Gestionnaire des espaces conformément à `EGP-DEC-041`. Les opérations de Location restent soumises aux droits standards Ventes/Location et aux règles EGP définies après prototype.
+La Responsable commerciale, l'ADV et l'Administrateur Odoo appartiennent au groupe Gestionnaire des espaces conformément à `EGP-DEC-041`. Les opérations de location restent soumises aux droits standards Ventes/Location/Planning et aux règles EGP définies dans `egp_crm_rental`.
 
 La suppression accordée au groupe manager par une ACL standard doit être neutralisée par une surcharge `unlink()` pour respecter le besoin EGP. La suppression reste possible pour le superutilisateur ou l'Administrateur Odoo dans un contexte explicitement autorisé.
 
@@ -2050,7 +2093,7 @@ La Direction dispose d'une lecture globale sur les pistes/opportunités des soci
 - la Responsable commerciale, l'ADV et l'Administrateur Odoo sont Gestionnaires des espaces ;
 - un Commercial peut agir sur une location uniquement dans le périmètre de ses opportunités et selon les droits standards Location/Ventes ;
 - l'affichage de disponibilité peut montrer un créneau occupé sans exposer le client ou l'opportunité lorsque l'utilisateur n'a pas accès au dossier source ;
-- les ACL et règles exactes sont finalisées après identification des modèles techniques de Location ;
+- les créneaux Planning issus des commandes de location ne sont jamais modifiables directement par un rôle commercial : ils découlent du document Ventes ;
 - toute élévation technique utilisée par le service d'intégration est limitée à l'opération nécessaire et journalisée.
 
 ## 11.9 Contrôle des champs modifiables
@@ -2198,7 +2241,7 @@ Les favoris et regroupements partagés sont chargés par XML ; les utilisateurs 
 | EGP-KPI-OPP-020 | Contrats cadres actifs | Mères actives dans leur période | CRM |
 | EGP-KPI-OPP-021 | Performance contrat cadre | Événements et CA des filles / cible | CRM/Ventes |
 | EGP-KPI-OPP-022 | Répartition par société | SCIC, MLK Restauration, autres | `company_id` |
-| EGP-KPI-OPP-023 | Taux d'occupation prévisionnel des espaces | Temps engagé / temps disponible par espace et période | Location ; modèle technique confirmé par EGP-DEC-010A/020 |
+| EGP-KPI-OPP-023 | Taux d'occupation prévisionnel des espaces | Temps engagé / temps disponible par espace et période | Créneaux Planning issus des commandes de location (EGP-DEC-010A) |
 
 ## 12.5 KPI Qualité Contacts
 
@@ -2257,7 +2300,7 @@ Les favoris et regroupements partagés sont chargés par XML ; les utilisateurs 
 - motifs de perte ;
 - nouveaux/récurrents/dormants ;
 - contrats cadres actifs ;
-- taux d'occupation prévisionnel calculé depuis les périodes et engagements de l'application Location.
+- taux d'occupation prévisionnel calculé depuis les créneaux Planning issus des commandes de location.
 
 ## 12.7 Architecture de reporting proposée
 
@@ -2343,7 +2386,7 @@ flowchart TD
     D --> E[Chargement des référentiels]
     E --> F[Initialisation idempotente des nouveaux champs]
     F --> G[Remapping éventuel des étapes et sources]
-    G --> H[Prototype et configuration Location]
+    G --> H[Configuration Location et Planning des espaces]
     H --> I[Réconciliation et recette]
 ```
 
@@ -2363,7 +2406,8 @@ Aucun nettoyage destructif, fusion de contacts ou réécriture d'historique n'es
 | Mode de création | `egp_creation_mode` | Déduction contrôlée | `outbound`/`inbound_direct` seulement si démontrable ; sinon valeur historique neutre ou vide selon décision |
 | Température | `egp_temperature_id` | Mapping | Aucune valeur inventée |
 | Type d'événement | `egp_event_type_id` | Mapping | Aucune valeur libre créée |
-| Espaces historiques | `egp_space_ids` | Mapping vers le modèle d'espace Location retenu | Seulement après validation de l'architecture et si une source structurée existe |
+| Espaces historiques | `egp_space_ids` | Mapping vers les produits de location des espaces | Seulement si une source structurée existe ; aucune création libre de produit |
+| Configuration de salle historique | `egp_configuration_id` | Mapping par code | Valeur non mappée laissée vide et journalisée |
 | Étape CRM | `stage_id` | Remapping explicite si le pipeline change | Mapping validé, jamais fondé uniquement sur le libellé |
 | Contrat cadre | champs mère/filles | Initialisation ciblée | Seulement pour des dossiers identifiés et validés |
 
@@ -2421,7 +2465,7 @@ Le rapport de contrôle compare avant/après au minimum :
 - aucun écrasement d'une donnée existante sans règle explicite ;
 - aucune valeur de référentiel inconnue créée automatiquement ;
 - règles de sécurité et approbations Studio testées ;
-- disponibilité des espaces testée sur le prototype Location ;
+- disponibilité et blocage des espaces testés sur la configuration Location + Planning ;
 - écarts fonctionnels et financiers expliqués ;
 - validation métier des échantillons Contacts, Pistes, Opportunités, options, contrats cadres et dossiers perdus.
 
@@ -2732,14 +2776,19 @@ La recette comporte au minimum :
 | EGP-TST-OPP-020 | Plusieurs devis sur une opportunité | Tous liés, CA prévisionnel/signé sans double comptage |
 | EGP-TST-OPP-021 | Passage Acompte versé sans acompte requis | Conforme à la règle de dérogation validée |
 | EGP-TST-OPP-022 | Passage Clôturée | Contrôles administratifs et financiers appliqués |
-| EGP-TST-OPP-023 | Sélectionner un espace souhaité sans option | Aucun engagement Location créé ; disponibilité inchangée |
-| EGP-TST-OPP-024 | Poser une option sur une salle | Comportement conforme au prototype Location validé : période bloquée ou maintien d'option créé et lié |
-| EGP-TST-OPP-025 | Libérer une option | Engagement ou maintien d'option libéré, créneau de nouveau disponible, historique conservé |
+| EGP-TST-OPP-023 | Sélectionner un espace souhaité sans option | Aucun engagement de location créé ; disponibilité inchangée |
+| EGP-TST-OPP-024 | Poser une option sur une salle | Comportement conforme à la règle retenue en `EGP-DEC-020` : maintien d'option créé, lié et échéancé |
+| EGP-TST-OPP-025 | Libérer une option | Maintien d'option libéré, créneau de nouveau disponible, historique conservé |
 | EGP-TST-OPP-026 | Événement avec montage et démontage | Disponibilité évaluée de `egp_occupancy_start` à `egp_occupancy_end` |
 | EGP-TST-OPP-027 | Retirer l'espace principal de la liste | Refus ou remise à blanc selon comportement validé ; aucune incohérence |
-| EGP-TST-OPP-028 | Consulter la vue disponibilité | Occupation lisible par espace, période et état depuis Location |
+| EGP-TST-OPP-028 | Consulter la vue disponibilité | Occupation lisible par espace, période et état depuis les créneaux Planning |
 | EGP-TST-OPP-030 | Agence contractuelle et client final distinct | Devis adressé à l'agence ; client final visible dans CRM/Projet sans être facturé par défaut |
 | EGP-TST-OPP-029 | Confirmer par portail/API un devis non approuvé | Confirmation impossible ou contrôle complémentaire déclenché |
+| EGP-TST-OPP-031 | Confirmer une commande de location alors que toutes les salles du Rôle sont prises | Confirmation refusée nativement ; message métier indiquant l'espace et la période en conflit |
+| EGP-TST-OPP-032 | Confirmer deux commandes pour deux salles du même Rôle sur la même période | Deux matériels distincts affectés, aucun doublon d'affectation |
+| EGP-TST-OPP-033 | Modifier les dates d'une commande de location confirmée | Créneaux Planning resynchronisés nativement, ou échec restitué par un message explicite si la salle n'est plus libre |
+| EGP-TST-OPP-034 | Saisir un nombre de personnes supérieur à l'usage habituel d'une salle | Aucun blocage système : la capacité n'est pas un attribut du référentiel des espaces (EGP-DEC-049) |
+| EGP-TST-OPP-035 | Changer la configuration de salle sur l'opportunité | Valeur tracée dans le chatter ; aucune répercussion automatique sur le catalogue des espaces |
 
 ## 15.6 Cas de recette Sécurité
 
@@ -2764,8 +2813,8 @@ La recette comporte au minimum :
 | EGP-TST-SEC-016 | Approbateur des remises ouvre Studio | Accès refusé sauf s'il possède séparément un rôle administrateur |
 | EGP-TST-SEC-017 | Commercial tente de modifier la règle d'approbation | Accès refusé |
 | EGP-TST-SEC-018 | Administrateur modifie la règle en préproduction | Modification autorisée, testée et documentée avant production |
-| EGP-TST-SEC-019 | Commercial tente de modifier le catalogue Location d'un espace | Accès refusé |
-| EGP-TST-SEC-020 | Responsable commerciale ou ADV, Gestionnaire des espaces, modifie une salle/capacité | Succès et traçabilité |
+| EGP-TST-SEC-019 | Commercial tente de modifier un produit d'espace ou un matériel Planning | Accès refusé |
+| EGP-TST-SEC-020 | Responsable commerciale ou ADV, Gestionnaire des espaces, modifie un espace ou son matériel | Succès et traçabilité |
 | EGP-TST-SEC-021 | Utilisateur sans accès au dossier consulte la disponibilité | Créneau occupé visible, identité du client et opportunité non exposées |
 
 ## 15.7 Cas de recette Upgrade et initialisation
@@ -2816,7 +2865,7 @@ La version est acceptée lorsque :
 | EGP-DEC-007 | Client régulier calculé selon seuils configurables | Nombre d'événements + fenêtre glissante par société | Validé, valeurs à fournir |
 | EGP-DEC-008 | Onglet Événement du Contact en lecture seule | Indicateurs calculés, aucune ressaisie | Validé |
 | EGP-DEC-009 | Types d'événement administrables et hiérarchiques | Modèle `egp.event.type` avec catégorie parente ; taxonomie fournie au §8.10 | Validé (V0.5) |
-| EGP-DEC-010B | Espaces, capacités, configurations et prestations administrables | Gouvernance par rôles ; valeurs initiales à fournir | Architecture validée |
+| EGP-DEC-010B | Espaces, configurations de salle et prestations administrables | Gouvernance par rôles ; valeurs initiales à fournir | Architecture validée |
 | EGP-DEC-011 | Critères de qualification du §6.4 | Contrôle serveur bloquant | Validé |
 | EGP-DEC-012 | Inactivité d'une piste à 15 jours, configurable | `EGP-PAR-002`, administration Odoo | Validé |
 | EGP-DEC-013 | Doublon de besoin bloquant avec dérogation manager | Justification obligatoire | Validé |
@@ -2850,14 +2899,16 @@ La version est acceptée lorsque :
 | EGP-DEC-029 | Liste définitive des champs ADV | Liste proposée au §11.9.1, versionnée dans le code | Validé (V0.5) |
 | EGP-DEC-047 | Apporteur d'affaire | Trois schémas d'intermédiation `direct`/`agency`/`introducer` via `egp_intermediation_type` + `egp_business_introducer_id` (§7.2.1) ; relation Contacts dédiée (§8.5) ; commission éventuelle à cadrer avec Ventes/Comptabilité | Validé (V0.5) |
 | EGP-DEC-048 | Potentiel et segmentation de l'affaire | Champs Nombre d'événements annuels (`egp_annual_event_count`) et Segment de marché (`egp_market_segment_id`, §8.11) ajoutés sur piste et opportunité | Validé (V0.5) |
+| EGP-DEC-010A | Modèle technique des espaces | Espace = **produit de location de type Service** rattaché à un **Rôle Planning** ; salle physique = **Matériel** Planning ; pont natif `sale_renting_planning` ; aucun modèle `egp.space` (§7.3.1) | Validé (V0.6) |
+| EGP-DEC-049 | Capacité et configuration de salle | Caractéristiques de l'événement portées par `egp_participant_count` et `egp_configuration_id` sur `crm.lead` ; aucun champ de capacité sur le produit de location ni sur le matériel Planning ; aucune contrainte automatique d'adéquation (§7.3.1) | Validé (V0.6) |
+| EGP-DEC-050 | Contact de la piste : champ unique | Le formulaire Piste remplace le champ texte natif `partner_name` (« Nom de la société ») par le champ relationnel `partner_id` (widget `res_partner_many2one`), affiché sans condition de mode développeur. Motif : une saisie libre dans `partner_name` déclenche, lors de la conversion native (`_create_customer`), la création silencieuse d'une organisation incomplète (sans type de structure ni secteur), bloquée ensuite par EGP-RG-020 et annulée (rollback) sans retour visible pour le Prospecteur. Le champ natif `partner_id` du groupe `lead_partner` (masqué hors mode développeur, cf. `is_partner_visible`) est rendu inconditionnellement invisible pour éviter le doublon | Validé (V0.7) |
 
 ## 16.2 Décisions ou données restant à valider
 
 | ID | Sujet restant | Proposition / état actuel | Échéance ou impact |
 |---|---|---|---|
-| EGP-DEC-010A | Modèle technique des espaces | Choix délégué par EGP ; par défaut **espace = produit de location**, `egp.space` lié à un produit seulement si le catalogue Location ne couvre pas les données métier ; confirmation au prototype | Prototype Location obligatoire |
-| EGP-DEC-010B | Valeurs espaces/capacités/configurations/prestations | Administrables ; détaillées dans le CDF Location/Ventes | À fournir avant recette Location/CRM |
-| EGP-DEC-020 | Conflits et options d'espace | Comportement Location à tester (brouillon, option, commande, chevauchement) ; détaillé dans le CDF Location/Ventes | Bloque l'addon `egp_crm_rental` |
+| EGP-DEC-010B | Valeurs espaces/configurations/prestations | Administrables ; détaillées dans le CDF Location/Ventes | À fournir avant recette Location/CRM |
+| EGP-DEC-020 | Représentation de l'option non confirmée | Le comportement des conflits est établi : blocage natif à la confirmation de la commande de location, aucun blocage sur un devis. Reste à arbitrer la matérialisation de l'option commerciale avant commande : avertissement non bloquant, blocage avec dérogation manager, ou créneau Planning d'option dédié libéré à l'expiration | Conditionne la partie « option » de `egp_crm_rental` ; le reste de l'addon peut être développé |
 | EGP-DEC-021 | Validation des remises | Pas de seuil automatique : la remise dépend de trop de variables (lignes produits) et reste **soumise à validation du responsable** ; règle d'approbation configurée dans Studio | Non bloquant ; principe arbitré par EGP |
 | EGP-DEC-025 | Règle d'acompte | À définir avec client, Ventes et Comptabilité ; détaillée dans le CDF Location/Ventes | Bloque les transitions financières finales |
 | EGP-DEC-033 | Définitions détaillées des KPI et cohortes | À voir ultérieurement ; atelier avant recette des tableaux de bord | Bloque la validation des KPI, pas le socle CRM |
@@ -2867,24 +2918,24 @@ La version est acceptée lorsque :
 
 ## 16.3 Priorités d'arbitrage restantes
 
-1. `EGP-DEC-010A` et `EGP-DEC-020` — prototype du module Location et modèle des espaces ;
+1. `EGP-DEC-020` — matérialisation de l'option commerciale avant commande ;
 2. listes et valeurs `EGP-DEC-010B` — nécessaires avant recette, mais pas pour coder le patron des référentiels ;
 3. `EGP-DEC-025` — règle d'acompte ;
 4. `EGP-DEC-033` — définitions KPI ;
 5. `EGP-DEC-036/037` — audit Studio et politique RGPD.
 
-`EGP-DEC-021` n'est plus considérée comme bloquante pour le développement : le seuil de remise pourra être renseigné et activé dans Studio ultérieurement.
+`EGP-DEC-010A` et `EGP-DEC-049` sont clôturées : le modèle des espaces et le rattachement de la capacité et de la configuration à l'événement ne bloquent plus le développement. `EGP-DEC-021` reste non bloquante : le seuil de remise pourra être renseigné et activé dans Studio ultérieurement.
 
 # 17. Plan d'implémentation proposé
 
-## 17.1 Lot 0 — Audit, prototypes et arbitrages restants
+## 17.1 Lot 0 — Audit, configuration Location et arbitrages restants
 
 Livrables :
 
 - inventaire de la base Odoo 16 et des personnalisations Studio ;
 - rapport du test d'upgrade standard vers Odoo 19 ;
 - matrice d'initialisation des nouveaux champs EGP ;
-- prototype Location : produits louables, périodes, disponibilités, multi-jours, options et conflits ;
+- maquette Location + Planning : produits de service louables, Rôles, Matériels, disponibilités multi-jours et arbitrage de l'option non confirmée (`EGP-DEC-020`) ;
 - validation du modèle Agence/client final et de la relation avec EGP ;
 - matrice de droits signée, incluant l'ADV et les équipes commerciales ;
 - mapping éventuel des étapes et référentiels ;
@@ -2929,8 +2980,8 @@ Critère de sortie : cycle complet Création → Qualification → Conversion/Pe
 - pipeline Opportunités avec probabilité native ;
 - formulaires, Kanban, calendrier et filtres ;
 - champs client contractuel/client final selon décision ;
-- addon `egp_crm_rental` après validation du prototype ;
-- espaces souhaités, espace principal, option et lien Location ;
+- addon `egp_crm_rental` sur la base Location + Planning arrêtée ;
+- espaces souhaités, espace principal, configuration de salle, option et lien vers les commandes de location ;
 - vue disponibilité/occupation des espaces ;
 - prestations, risques et signaux ;
 - contrats cadres mère/filles ;
@@ -2939,7 +2990,7 @@ Critère de sortie : cycle complet Création → Qualification → Conversion/Pe
 - automatisations CRM P0/P1 ;
 - initialisation ciblée des nouveaux champs sur les opportunités existantes.
 
-Critère de sortie : cycle de vente CRM validé jusqu'à la commande, avec disponibilité des espaces conforme à Location.
+Critère de sortie : cycle de vente CRM validé jusqu'à la commande, avec disponibilité des espaces conforme au comportement natif Location + Planning.
 
 ## 17.5 Lot 4 — Ventes, Projet et Finance
 
@@ -2963,7 +3014,7 @@ Critère de sortie : opportunité → devis → commande → projet sans double 
 - rapport natif des activités évalué en premier ;
 - tableaux opérationnels ;
 - rapports décisionnels ;
-- taux d'occupation issu de Location ;
+- taux d'occupation issu des créneaux Planning ;
 - tests de performance ;
 - recette sécurité complète, y compris accès Studio, équipes et whitelist ADV ;
 - répétition générale upgrade + installation + initialisation ;
@@ -2977,7 +3028,7 @@ Les cockpits très personnalisés et automatisations P2 sont planifiés après s
 ## 17.7 Documentation à livrer avec le code et la configuration
 
 - README d'installation et dépendances ;
-- guide d'administration des référentiels et du catalogue Location des espaces ;
+- guide d'administration des référentiels, du catalogue des produits de location et des Rôles/Matériels Planning des espaces ;
 - guide des rôles et habilitations ;
 - catalogue des champs ;
 - catalogue des automatisations, paramètres et crons ;
@@ -3130,10 +3181,11 @@ La couleur est un attribut d'affichage, non une donnée utilisée dans la logiqu
 | Activités/chatter | Oui | Types/plans | Idempotence, alertes temporelles, journal KPI éventuel |
 | Perte/motif/commentaire/date | Oui | Référentiel de motifs | Concurrent et relance conditionnelle uniquement |
 | Sources/canaux | Oui | UTM | Politique piste vs opportunité directe |
-| Salles/lieux | Oui avec Location, modèle à confirmer | Produits louables, capacités et périodes | Relation CRM vers produit Location ou `egp.space` lié |
-| Disponibilité/location | Oui avec Location | Périodes, devis/commandes et états | Maintien d'option et contrôle des conflits selon prototype |
+| Salles/lieux | Oui, Location + Planning | Produits de service louables, Rôles et Matériels | Relation CRM vers le produit de location ; aucun modèle `egp.space` |
+| Capacité et configuration de salle | Non | Référentiel `egp.event.configuration` | Champs portés par l'événement, jamais par la salle |
+| Disponibilité/location | Oui, Location + Planning | Produits, Rôles, Matériels et périodes | Badge de disponibilité en qualification et message métier de conflit |
 | Prestations | Non dans CRM standard | — | Champs et référentiels EGP |
-| Option commerciale | Partiellement via réservation | Rappels | État, échéance et orchestration CRM |
+| Option commerciale | Non couverte : un devis ne bloque rien | Rappels | État, échéance et orchestration CRM selon `EGP-DEC-020` |
 | Contrat cadre mère/filles | Non sous cette forme | — | Relations, bouton et agrégats |
 | Devis liés CRM | Oui via `sale_crm` | Flux | Relance/versionnement et KPI ciblés |
 | Validation remise | Oui via Studio | Règle d'approbation et groupe | Contrôle serveur seulement si un chemin contourne le bouton |
@@ -3154,9 +3206,10 @@ La couleur est un attribut d'affichage, non une donnée utilisée dans la logiqu
 | Type de structure/secteur/activité | Contacts | Contacts/référentiel admin | CRM/Reporting/Marketing | Jamais copié manuellement |
 | Source de prospection | Piste/Opportunité | CRM | Reporting | Conservée sur le même `crm.lead` |
 | Type d'événement/besoin initial | Piste ou Opportunité | CRM | Devis/Projet en lecture ou transmission | Conservé lors conversion |
-| Espaces envisagés | Piste/Opportunité | CRM | Location/Reporting | Relation vers le modèle d'espace retenu, sans engagement automatique |
-| Espace principal | Opportunité | CRM | Reporting/Ventes/Projet | Même modèle que les espaces envisagés |
-| Option/location d'espace | Opportunité + Location | CRM par action métier ; engagement dans Location selon prototype | Disponibilité, Reporting, Projet | Option libérée ou location confirmée tracée |
+| Espaces envisagés | Piste/Opportunité | CRM | Location/Reporting | Relation vers les produits de location, sans engagement automatique |
+| Espace principal | Opportunité | CRM | Reporting/Ventes/Projet | Même référentiel que les espaces envisagés |
+| Nombre de personnes et configuration de salle | Piste/Opportunité | CRM | Ventes/Projet/Reporting | Caractéristiques de l'événement ; jamais recopiées sur le catalogue des espaces |
+| Option/location d'espace | Opportunité + Location | CRM par action métier ; engagement à la confirmation de la commande de location | Disponibilité, Reporting, Projet | Option libérée ou location confirmée tracée |
 | Signaux commerciaux | Piste/Opportunité | CRM | Reporting/Direction | Conservés lors conversion |
 | Budget client | Piste/Opportunité | CRM | Reporting | Ne devient pas le montant du devis automatiquement |
 | CA prévisionnel | Opportunité | CRM | Reporting | Comparé au CA signé |
@@ -3199,20 +3252,22 @@ La couleur est un attribut d'affichage, non une donnée utilisée dans la logiqu
 ### Opportunités et espaces
 
 - [x] `egp_main_space_id` conservé ;
+- [x] modèle technique des espaces validé — produit de location de service + Rôle/Matériels Planning ;
+- [x] capacité et configuration de salle rattachées à l'événement, pas au référentiel des espaces ;
+- [x] comportement de conflit établi : blocage natif à la confirmation de la commande de location ;
 - [x] mécanisme d'approbation des remises basé sur Studio ;
 - [x] déclencheur Projet à la commande confirmée ;
 - [x] développement spécifique CRM → Projet validé ;
 - [x] lecture des opportunités de la même équipe validée ;
 - [x] Gestionnaires des espaces = Responsable commerciale + ADV + Admin ;
 - [x] clôture et contrats cadres validés ;
-- [ ] modèle Agence/client final validé ;
-- [ ] modèle technique Location des espaces validé ;
-- [ ] prototype Location multi-jours, capacités, options, conflits et vue disponibilité validé ;
-- [ ] liste des salles, capacités, configurations et prestations fournie ;
-- [ ] liste initiale des types d'événement fournie ;
+- [x] modèle Agence/client final validé ;
+- [ ] matérialisation de l'option commerciale avant commande arbitrée (`EGP-DEC-020`) ;
+- [ ] liste des salles, configurations et prestations fournie ;
+- [x] liste initiale des types d'événement fournie ;
 - [ ] seuil de remise et méthode de calcul fournis — non bloquant pour le socle ;
 - [ ] règle d'acompte validée ;
-- [ ] liste définitive des champs ADV validée.
+- [x] liste définitive des champs ADV validée.
 
 ### Reporting, upgrade et initialisation
 
@@ -3227,6 +3282,6 @@ La couleur est un attribut d'affichage, non une donnée utilisée dans la logiqu
 
 # Conclusion
 
-La solution cible doit rester une extension maîtrisée d'Odoo 19 : `res.partner` comme référentiel unique des organisations et contacts, `crm.lead` comme support commun des pistes et opportunités, `sale.order` pour les offres/commandes, puis `project.project` pour la production. Les développements spécifiques sont concentrés sur les référentiels administrables, la qualification, les options, les contrats cadres, la sécurité fine et les interfaces transverses.
+La solution cible doit rester une extension maîtrisée d'Odoo 19 : `res.partner` comme référentiel unique des organisations et contacts, `crm.lead` comme support commun des pistes et opportunités, `sale.order` pour les offres/commandes et les engagements de location, le couple Location + Planning pour la disponibilité des espaces, puis `project.project` pour la production. Les développements spécifiques sont concentrés sur les référentiels administrables, la qualification, les options, les contrats cadres, la sécurité fine et les interfaces transverses.
 
-La priorité de mise en œuvre est de fiabiliser les données, les droits et le prototype de disponibilité des espaces avant de développer les automatismes et tableaux de bord avancés. Les décisions encore ouvertes de la section 16 doivent être arbitrées avant le gel de la conception détaillée et le démarrage des développements P0.
+La priorité de mise en œuvre est de fiabiliser les données, les droits et la configuration Location + Planning avant de développer les automatismes et tableaux de bord avancés. Les décisions encore ouvertes de la section 16 doivent être arbitrées avant le gel de la conception détaillée et le démarrage des développements P0.

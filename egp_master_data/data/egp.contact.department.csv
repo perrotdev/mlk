@@ -1,0 +1,18 @@
+id,code,name,sequence
+contact_department_general_management,GENERAL_MANAGEMENT,Direction générale,10
+contact_department_communication_management,COMMUNICATION_MANAGEMENT,Direction communication,20
+contact_department_communication,COMMUNICATION,Communication,30
+contact_department_marketing,MARKETING,Marketing,40
+contact_department_sales,SALES,Commercial,50
+contact_department_purchasing,PURCHASING,Achats,60
+contact_department_events,EVENTS,Événementiel,70
+contact_department_technical,TECHNICAL,Technique,80
+contact_department_it,IT,Informatique,90
+contact_department_hr,HR,Ressources humaines,100
+contact_department_finance,FINANCE,Finance,110
+contact_department_legal,LEGAL,Juridique,120
+contact_department_logistics,LOGISTICS,Logistique,130
+contact_department_administration,ADMINISTRATION,Administration,140
+contact_department_presidency,PRESIDENCY,Présidence,150
+contact_department_executive_office,EXECUTIVE_OFFICE,Cabinet,160
+contact_department_other,OTHER,Autre,900

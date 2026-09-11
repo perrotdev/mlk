@@ -1,0 +1,8 @@
+id,code,name,sequence
+market_segment_corporate,CORPORATE,Corporate,10
+market_segment_worship,WORSHIP,Cultuel,20
+market_segment_institutional,INSTITUTIONAL,Institutionnel,30
+market_segment_education,EDUCATION,Education,40
+market_segment_culture_entertainment,CULTURE_ENTERTAINMENT,Culture & Entertainment,50
+market_segment_general_public,GENERAL_PUBLIC,Grand public,60
+market_segment_private,PRIVATE,Privé,70

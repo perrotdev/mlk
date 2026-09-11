@@ -1,0 +1,409 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ================================================================
+         Vues génériques des référentiels EGP (spécification §9.5).
+         Le code est en lecture seule après création : il est utilisé par le
+         code métier et ne doit jamais être modifié une fois la valeur utilisée.
+         ================================================================ -->
+
+    <record id="view_egp_structure_type_list" model="ir.ui.view">
+        <field name="name">egp.structure.type.list</field>
+        <field name="model">egp.structure.type</field>
+        <field name="arch" type="xml">
+            <list string="Types de structure" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="code" readonly="id"/>
+                <field name="company_id" groups="base.group_multi_company" optional="show"/>
+                <field name="active" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_egp_structure_type_search" model="ir.ui.view">
+        <field name="name">egp.structure.type.search</field>
+        <field name="model">egp.structure.type</field>
+        <field name="arch" type="xml">
+            <search string="Types de structure">
+                <field name="name"/>
+                <field name="code"/>
+                <filter name="filter_archived" string="Archivés" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_egp_structure_type" model="ir.actions.act_window">
+        <field name="name">Types de structure</field>
+        <field name="res_model">egp.structure.type</field>
+        <field name="view_mode">list</field>
+        <field name="search_view_id" ref="view_egp_structure_type_search"/>
+    </record>
+
+    <record id="view_egp_business_activity_list" model="ir.ui.view">
+        <field name="name">egp.business.activity.list</field>
+        <field name="model">egp.business.activity</field>
+        <field name="arch" type="xml">
+            <list string="Activités principales" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="industry_id"/>
+                <field name="name"/>
+                <field name="code" readonly="id"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+                <field name="active" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_egp_business_activity_search" model="ir.ui.view">
+        <field name="name">egp.business.activity.search</field>
+        <field name="model">egp.business.activity</field>
+        <field name="arch" type="xml">
+            <search string="Activités principales">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="industry_id"/>
+                <filter name="filter_archived" string="Archivées" domain="[('active', '=', False)]"/>
+                <group>
+                    <filter name="group_by_industry" string="Secteur" context="{'group_by': 'industry_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_egp_business_activity" model="ir.actions.act_window">
+        <field name="name">Secteurs et activités</field>
+        <field name="res_model">egp.business.activity</field>
+        <field name="view_mode">list</field>
+        <field name="search_view_id" ref="view_egp_business_activity_search"/>
+        <field name="context">{'search_default_group_by_industry': 1}</field>
+    </record>
+
+    <record id="view_egp_partner_relation_list" model="ir.ui.view">
+        <field name="name">egp.partner.relation.list</field>
+        <field name="model">egp.partner.relation</field>
+        <field name="arch" type="xml">
+            <list string="Relations avec EGP" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="code" readonly="id"/>
+                <field name="active" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_egp_partner_relation" model="ir.actions.act_window">
+        <field name="name">Relations avec EGP</field>
+        <field name="res_model">egp.partner.relation</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <record id="view_egp_client_status_list" model="ir.ui.view">
+        <field name="name">egp.client.status.list</field>
+        <field name="model">egp.client.status</field>
+        <field name="arch" type="xml">
+            <list string="Statuts client" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="code" readonly="id"/>
+                <field name="description" optional="show"/>
+                <field name="active" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_egp_client_status" model="ir.actions.act_window">
+        <field name="name">Statuts client</field>
+        <field name="res_model">egp.client.status</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <record id="view_egp_company_size_list" model="ir.ui.view">
+        <field name="name">egp.company.size.list</field>
+        <field name="model">egp.company.size</field>
+        <field name="arch" type="xml">
+            <list string="Tailles d'entreprise" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="code" readonly="id"/>
+                <field name="active" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_egp_company_size" model="ir.actions.act_window">
+        <field name="name">Tailles d'entreprise</field>
+        <field name="res_model">egp.company.size</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <record id="view_egp_contact_department_list" model="ir.ui.view">
+        <field name="name">egp.contact.department.list</field>
+        <field name="model">egp.contact.department</field>
+        <field name="arch" type="xml">
+            <list string="Services / départements" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="code" readonly="id"/>
+                <field name="active" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_egp_contact_department" model="ir.actions.act_window">
+        <field name="name">Services / départements</field>
+        <field name="res_model">egp.contact.department</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <record id="view_egp_contact_channel_list" model="ir.ui.view">
+        <field name="name">egp.contact.channel.list</field>
+        <field name="model">egp.contact.channel</field>
+        <field name="arch" type="xml">
+            <list string="Canaux préférés" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="code" readonly="id"/>
+                <field name="active" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_egp_contact_channel" model="ir.actions.act_window">
+        <field name="name">Canaux préférés</field>
+        <field name="res_model">egp.contact.channel</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <record id="view_egp_administrative_region_list" model="ir.ui.view">
+        <field name="name">egp.administrative.region.list</field>
+        <field name="model">egp.administrative.region</field>
+        <field name="arch" type="xml">
+            <list string="Régions administratives" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="code" readonly="id"/>
+                <field name="state_ids" widget="many2many_tags" optional="show"/>
+                <field name="active" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_egp_administrative_region" model="ir.actions.act_window">
+        <field name="name">Régions administratives</field>
+        <field name="res_model">egp.administrative.region</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <record id="view_egp_event_type_list" model="ir.ui.view">
+        <field name="name">egp.event.type.list</field>
+        <field name="model">egp.event.type</field>
+        <field name="arch" type="xml">
+            <list string="Types d'événement" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="parent_id"/>
+                <field name="code" readonly="id"/>
+                <field name="active" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_egp_event_type_search" model="ir.ui.view">
+        <field name="name">egp.event.type.search</field>
+        <field name="model">egp.event.type</field>
+        <field name="arch" type="xml">
+            <search string="Types d'événement">
+                <field name="complete_name" string="Type d'événement" filter_domain="['|', ('complete_name', 'ilike', self), ('code', 'ilike', self)]"/>
+                <field name="parent_id"/>
+                <filter name="filter_categories" string="Catégories" domain="[('parent_id', '=', False)]"/>
+                <filter name="filter_archived" string="Archivés" domain="[('active', '=', False)]"/>
+                <group>
+                    <filter name="group_by_parent" string="Catégorie" context="{'group_by': 'parent_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_egp_event_type" model="ir.actions.act_window">
+        <field name="name">Types d'événement</field>
+        <field name="res_model">egp.event.type</field>
+        <field name="view_mode">list</field>
+        <field name="search_view_id" ref="view_egp_event_type_search"/>
+        <field name="context">{'search_default_group_by_parent': 1}</field>
+    </record>
+
+    <record id="view_egp_market_segment_list" model="ir.ui.view">
+        <field name="name">egp.market.segment.list</field>
+        <field name="model">egp.market.segment</field>
+        <field name="arch" type="xml">
+            <list string="Segments de marché" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="code" readonly="id"/>
+                <field name="active" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_egp_market_segment" model="ir.actions.act_window">
+        <field name="name">Segments de marché</field>
+        <field name="res_model">egp.market.segment</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <record id="view_egp_event_configuration_list" model="ir.ui.view">
+        <field name="name">egp.event.configuration.list</field>
+        <field name="model">egp.event.configuration</field>
+        <field name="arch" type="xml">
+            <list string="Configurations de salle" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="code" readonly="id"/>
+                <field name="active" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_egp_event_configuration" model="ir.actions.act_window">
+        <field name="name">Configurations</field>
+        <field name="res_model">egp.event.configuration</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <record id="view_egp_catering_type_list" model="ir.ui.view">
+        <field name="name">egp.catering.type.list</field>
+        <field name="model">egp.catering.type</field>
+        <field name="arch" type="xml">
+            <list string="Types de restauration" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="code" readonly="id"/>
+                <field name="active" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_egp_catering_type" model="ir.actions.act_window">
+        <field name="name">Restauration</field>
+        <field name="res_model">egp.catering.type</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <record id="view_egp_technical_level_list" model="ir.ui.view">
+        <field name="name">egp.technical.level.list</field>
+        <field name="model">egp.technical.level</field>
+        <field name="arch" type="xml">
+            <list string="Niveaux techniques" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="code" readonly="id"/>
+                <field name="active" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_egp_technical_level" model="ir.actions.act_window">
+        <field name="name">Niveaux techniques</field>
+        <field name="res_model">egp.technical.level</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <record id="view_egp_animation_type_list" model="ir.ui.view">
+        <field name="name">egp.animation.type.list</field>
+        <field name="model">egp.animation.type</field>
+        <field name="arch" type="xml">
+            <list string="Types d'animation" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="code" readonly="id"/>
+                <field name="active" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_egp_animation_type" model="ir.actions.act_window">
+        <field name="name">Animations</field>
+        <field name="res_model">egp.animation.type</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <record id="view_egp_lead_temperature_list" model="ir.ui.view">
+        <field name="name">egp.lead.temperature.list</field>
+        <field name="model">egp.lead.temperature</field>
+        <field name="arch" type="xml">
+            <list string="Températures" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="code" readonly="id"/>
+                <field name="color" widget="color_picker" optional="show"/>
+                <field name="active" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_egp_lead_temperature" model="ir.actions.act_window">
+        <field name="name">Températures</field>
+        <field name="res_model">egp.lead.temperature</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <record id="view_egp_maturity_level_list" model="ir.ui.view">
+        <field name="name">egp.maturity.level.list</field>
+        <field name="model">egp.maturity.level</field>
+        <field name="arch" type="xml">
+            <list string="Niveaux de maturité" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="code" readonly="id"/>
+                <field name="description" optional="show"/>
+                <field name="active" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_egp_maturity_level" model="ir.actions.act_window">
+        <field name="name">Maturités</field>
+        <field name="res_model">egp.maturity.level</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <record id="view_egp_opportunity_type_list" model="ir.ui.view">
+        <field name="name">egp.opportunity.type.list</field>
+        <field name="model">egp.opportunity.type</field>
+        <field name="arch" type="xml">
+            <list string="Types d'opportunité" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="code" readonly="id"/>
+                <field name="active" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_egp_opportunity_type" model="ir.actions.act_window">
+        <field name="name">Types d'opportunité</field>
+        <field name="res_model">egp.opportunity.type</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <record id="view_egp_admin_status_list" model="ir.ui.view">
+        <field name="name">egp.admin.status.list</field>
+        <field name="model">egp.admin.status</field>
+        <field name="arch" type="xml">
+            <list string="Statuts administratifs" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="code" readonly="id"/>
+                <field name="active" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_egp_admin_status" model="ir.actions.act_window">
+        <field name="name">Statuts administratifs</field>
+        <field name="res_model">egp.admin.status</field>
+        <field name="view_mode">list</field>
+    </record>
+
+</odoo>

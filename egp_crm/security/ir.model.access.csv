@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_crm_lead_egp_adv,crm.lead.egp.adv,crm.model_crm_lead,egp_crm.group_egp_adv,1,1,0,0
+access_crm_lead_egp_direction,crm.lead.egp.direction,crm.model_crm_lead,egp_crm.group_egp_direction,1,0,0,0
+access_crm_stage_egp_manager,crm.stage.egp.manager,crm.model_crm_stage,egp_crm.group_egp_sales_manager,1,1,1,0
+access_crm_lost_reason_egp_manager,crm.lost.reason.egp.manager,crm.model_crm_lost_reason,egp_crm.group_egp_sales_manager,1,1,1,0
+access_res_partner_egp_adv,res.partner.egp.adv,base.model_res_partner,egp_crm.group_egp_adv,1,1,1,0
+access_res_partner_egp_direction,res.partner.egp.direction,base.model_res_partner,egp_crm.group_egp_direction,1,0,0,0

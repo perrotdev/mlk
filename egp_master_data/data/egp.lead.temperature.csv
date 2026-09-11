@@ -1,0 +1,4 @@
+id,code,name,sequence,color
+lead_temperature_cold,COLD,Froid,10,4
+lead_temperature_warm,WARM,Tiède,20,3
+lead_temperature_hot,HOT,Chaud,30,2

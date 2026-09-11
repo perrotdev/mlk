@@ -1,0 +1,8 @@
+id,code,name,sequence
+animation_type_dj,DJ,DJ,10
+animation_type_live_music,LIVE_MUSIC,Musique live,20
+animation_type_show,SHOW,Spectacle,30
+animation_type_host,HOST,Animateur / maître de cérémonie,40
+animation_type_team_building,TEAM_BUILDING,Team building,50
+animation_type_photo_booth,PHOTO_BOOTH,Photobooth,60
+animation_type_other,OTHER,Autre,900

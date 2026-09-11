@@ -1,0 +1,6 @@
+id,code,name,sequence
+admin_status_to_process,TO_PROCESS,À traiter,10
+admin_status_in_progress,IN_PROGRESS,En cours de constitution,20
+admin_status_waiting_customer,WAITING_CUSTOMER,En attente client,30
+admin_status_complete,COMPLETE,Dossier complet,40
+admin_status_closed,CLOSED,Clôturé,50
